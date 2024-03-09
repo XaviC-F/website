@@ -18,16 +18,15 @@ nav {
   font: bold;
 }
 
-
-html {
-  font: 2em;
-}
-
 h2 {
   text-align: center;
   font-family: Lora, "Source Serif 4", serif;
   font-style: italic;
   font-size: large;
+}
+
+html {
+  font: 2em;
 }
 
 .image-container {
@@ -87,6 +86,6 @@ h2 {
     width: 100%; /* Set the width to 100% on smaller screens */
     max-width: none; /* Remove the maximum width restriction */
     height: auto; /* Allow the height to adjust automatically */
-    margin: 5%; /* Adjust as needed */
+    margin: 0; /* Adjust as needed */
   }
 }
