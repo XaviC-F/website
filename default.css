@@ -4,6 +4,8 @@ body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
   margin: 0 auto;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
 header {
@@ -63,6 +65,8 @@ h2 {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     width: 90%;
     margin: 0 auto;
+    margin-top: 0;
+    margin-bottom: 0;
   }
   
   h1 {
