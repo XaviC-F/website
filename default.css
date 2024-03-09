@@ -1,4 +1,5 @@
 body {
+  margin: 0;
   background-color:rgb(159, 213, 215);
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
@@ -22,13 +23,13 @@ html {
 
 h1 {
   text-align: center;
-  font-family: Lora, "Source Serif 4", serif;
+  font-family: serif;
   font: x-large, bold;
 }
 
 h2 {
   text-align: center;
-  font-family: Lora, "Source Serif 4", serif;
+  font-family: serif;
   font: large, italic;
 }
 
@@ -60,6 +61,14 @@ h2 {
 @media (max-width: 768px) {
   html {
     font: 1em;
+  }
+
+  body {
+    margin: 0;
+    background-color:rgb(159, 213, 215);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    width: 90%;
+    margin: 0 auto;
   }
   
   h1 {
