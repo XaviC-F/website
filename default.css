@@ -6,10 +6,21 @@ h1 {
   font: 2em;
 }
 
+@media (max-width: 800px) {
+  html {
+    font: 0.5em;
+  }
+  
+  h1 {
+    font: 1em;
+  }
+}
+
 @media (min-width: 1200px) {
   h1 {
       font: 4em;
   }
+
 }
 
 body {
