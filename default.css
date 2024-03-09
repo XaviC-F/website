@@ -1,5 +1,5 @@
 body {
-  background-color: antiquewhite;
+  background-color:rgb(159, 213, 215);
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
   margin: 0 auto;
@@ -16,11 +16,11 @@ nav {
 
 
 html {
-  font: 1em;
+  font: 2em;
 }
 
 h1 {
-  font: 2em;
+  font: 4em;
 }
 
 .image-container {
@@ -30,7 +30,7 @@ h1 {
 }
 
 .image-container img {
-  max-width: 50%; /* Set a maximum width for the images */
+  max-width: 60%; /* Set a maximum width for the images */
   height: auto; /* Allow the height to adjust automatically */
   margin: 20px; /* Adjust as needed */
 }
@@ -49,11 +49,11 @@ h1 {
 
 @media (max-width: 768px) {
   html {
-    font: 0.5em;
+    font: 1em;
   }
   
   h1 {
-    font: 1em;
+    font: 2em;
   }
   
   .image-container img {
