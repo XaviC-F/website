@@ -11,6 +11,8 @@ header {
   font-family: Lora, "Source Serif 4", serif;
   font-size: 2.5em;
   font-weight: bold;
+  margin-top: 5px; /* Remove top margin */
+  margin-bottom: 10px; /* Adjust bottom margin as needed */
 }
 
 nav {
@@ -51,6 +53,9 @@ h2 {
 }
 
 @media (max-width: 768px) {
+  h2 {
+    font-size: 1.5em;
+  }
 
   body {
     margin: 0;
@@ -64,11 +69,6 @@ h2 {
     font: 1.5em;
   }
 
-  h2 {
-    font-size: 1.2em;
-  }
-
-  
   .image-container {
     flex-direction: row; /* Change flex direction to row for mobile devices */
     align-items: center; /* Align items in the center vertically */
