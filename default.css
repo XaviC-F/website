@@ -27,7 +27,9 @@ h1 {
 }
 
 .image-container img {
-  width: 33.33%; /* Each image takes up 1/3 of the container width */
+  width: 10%; /* Adjust as needed */
+  height: auto; /* Ensure aspect ratio is maintained */
+  margin: 5px; /* Each image takes up 1/3 of the container width */
 }
 
 @media (max-width: 768px) {
@@ -40,6 +42,8 @@ h1 {
   }
   
   .image-container img {
-    width: 100%; /* Each image takes up 100% of the container width on mobile */
+    width: 50%;
+    height: auto; /* Ensure aspect ratio is maintained */
+    margin: 5%; /* Each image takes up 100% of the container width on mobile */
   }
 }
