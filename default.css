@@ -8,6 +8,7 @@ body {
 header {
   text-align: center;
   font-family: Lora, "Source Serif 4", serif;
+  font: x-large, bold;
 }
 
 nav {
@@ -21,7 +22,9 @@ html {
 }
 
 h1 {
-  font: 6em;
+  text-align: center;
+  font-family: Lora, "Source Serif 4", serif;
+  font: large, italic;
 }
 
 .image-container {
