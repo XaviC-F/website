@@ -35,6 +35,18 @@ h1 {
   margin: 20px; /* Adjust as needed */
 }
 
+
+.image-wrapper {
+  height: 200px; /* Set a fixed height for each image container */
+  margin: 5px; /* Adjust as needed */
+}
+
+.image-wrapper img {
+  max-width: 100%; /* Ensure images don't exceed container width */
+  height: 100%; /* Ensure images fill the container height */
+  object-fit: cover; /* Maintain aspect ratio and cover entire container */
+}
+
 @media (max-width: 768px) {
   html {
     font: 0.5em;
