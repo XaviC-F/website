@@ -2,7 +2,7 @@ body {
   background-color: antiquewhite;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
-  align-self: center;
+  margin: 20% auto;
 }
 
 header {
@@ -27,6 +27,7 @@ h1 {
   align-self: center;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .image-container img {
