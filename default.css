@@ -48,6 +48,7 @@ h2 {
 .image-wrapper {
   height: 300px; /* Set a fixed height for each image container */
   margin: 5px; /* Adjust as needed */
+  margin-top: 0;
 }
 
 .image-wrapper img {
