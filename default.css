@@ -7,6 +7,7 @@ body {
 
 header {
   text-align: center;
+  font-family: Lora, "Source Serif 4", serif;
 }
 
 nav {
@@ -20,7 +21,7 @@ html {
 }
 
 h1 {
-  font: 4em;
+  font: 6em;
 }
 
 .image-container {
