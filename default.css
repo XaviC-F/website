@@ -30,9 +30,9 @@ h1 {
 }
 
 .image-container img {
-  width: 10%; /* Adjust as needed */
+  width: 20%; /* Adjust as needed */
   height: auto; /* Ensure aspect ratio is maintained */
-  margin: 5px; /* Each image takes up 1/3 of the container width */
+  margin: 50px; /* Each image takes up 1/3 of the container width */
 }
 
 @media (max-width: 768px) {
