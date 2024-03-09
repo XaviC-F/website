@@ -9,7 +9,7 @@ body {
 header {
   text-align: center;
   font-family: Lora, "Source Serif 4", serif;
-  font-size: 3em;
+  font-size: 2.5em;
   font-weight: bold;
 }
 
@@ -61,11 +61,11 @@ h2 {
   }
   
   h1 {
-    font: 2em;
+    font: 1.5em;
   }
 
   h2 {
-    font-size: 1em;
+    font-size: 1.2em;
   }
 
   
