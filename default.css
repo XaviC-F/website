@@ -68,9 +68,6 @@ main {
 .image-container img {
   max-width: 100%; /* Ensure the image takes up the available width */
   height: auto; /* Allow the height to adjust automatically */
-  
-  max-width: 50%;
-  height: auto;
   margin: 5px;
   object-fit: cover;
 }
