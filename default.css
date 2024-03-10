@@ -29,7 +29,7 @@ body {
   width: 60%;
   margin: 0 auto;
   margin-bottom: 0;
-  margin-top: 0;
+  margin-top: 10px;
 }
 
 header {
@@ -56,7 +56,7 @@ h2 {
 }
 
 .image-container img {
-  max-width: 60%;
+  max-width: 50%;
   height: auto;
   margin: 5px;
   object-fit: cover;
@@ -65,7 +65,7 @@ h2 {
 .nav-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #007bff; /* Default button color */
+  background-color: #007bff88; /* Default button color */
   color: white;
   text-decoration: none;
   border-radius: 5px;
@@ -73,7 +73,7 @@ h2 {
 }
 
 .nav-button:hover {
-  background-color: #0056b3; /* Button color on hover */
+  background-color: #0057b3e4; /* Button color on hover */
 }
 
 @media (max-width: 768px) {
@@ -98,12 +98,6 @@ h2 {
   .image-container {
     flex-direction: row; /* Change flex direction to row for mobile devices */
     align-items: center; /* Align items in the center vertically */
-  }
-
-  .image-wrapper {
-      flex: 1 0 100%; /* Make each image wrapper take full width on mobile */
-      height: auto; /* Allow height to adjust automatically */
-      margin: 0; /* Remove margin */
   }
 
   .image-container img {
