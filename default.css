@@ -113,6 +113,23 @@ h2 {
     font-size: 2em;
   }
 
+  .main-two-columns {
+    flex-direction: column; /* Change to a vertical layout on smaller screens */
+  }
+
+  .image-container {
+    order: 2; /* Change the order of the image container to appear after text */
+  }
+
+  .main-content {
+    order: 1; /* Change the order of the text content to appear before image */
+  }
+
+  .nav-button {
+    display: block; /* Display navigation buttons as block elements */
+    margin-bottom: 10px; /* Add spacing between navigation buttons */
+  }
+
   .image-container {
     flex-direction: row; /* Change flex direction to row for mobile devices */
     align-items: center; /* Align items in the center vertically */
@@ -122,6 +139,6 @@ h2 {
     width: 100%; /* Set the width to 100% on smaller screens */
     max-width: none; /* Remove the maximum width restriction */
     height: auto; /* Allow the height to adjust automatically */
-    margin: 0; /* Adjust as needed */
+    margin-bottom: 10px; /* Adjust as needed */
   }
 }
