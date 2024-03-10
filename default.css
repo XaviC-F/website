@@ -36,8 +36,7 @@ header {
   text-align: center;
   font-size: 2.5em;
   font-weight: bold;
-  margin-top: 5px; /* Remove top margin */
-  margin-bottom: 10px; /* Adjust bottom margin as needed */
+  margin: 0;
 }
 
 nav {
@@ -49,9 +48,7 @@ nav {
 h2 {
   text-align: center;
   font-size: 2em;
-  font-style: italic;
 }
-
 
 .main-two-columns {
   display: flex;
@@ -95,16 +92,16 @@ h2 {
 }
 
 @media (max-width: 768px) {
+  header {
+    font-size: 2em;
+  }
+  
   h2 {
     font-size: 1.5em;
   }
 
   body {
     width: 90%;
-  }
-  
-  h2 {
-    font-size: 2em;
   }
 
   .main-two-columns {
