@@ -112,11 +112,11 @@ h2 {
   }
 
   .image-container {
-    order: 2; /* Change the order of the image container to appear after text */
+    order: 1; /* Change the order of the image container to appear after text */
   }
 
   .main-content {
-    order: 1; /* Change the order of the text content to appear before image */
+    order: 2; /* Change the order of the text content to appear before image */
   }
 
   .nav-button {
