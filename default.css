@@ -100,13 +100,7 @@ h2 {
   }
 
   body {
-    margin: 0;
-    background-color:rgb(159, 213, 215);
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
     width: 90%;
-    margin: 0 auto;
-    margin-top: 0;
-    margin-bottom: 0;
   }
   
   h2 {
@@ -127,6 +121,7 @@ h2 {
 
   .nav-button {
     display: block; /* Display navigation buttons as block elements */
+    margin-top: 10px;
     margin-bottom: 10px; /* Add spacing between navigation buttons */
   }
 
