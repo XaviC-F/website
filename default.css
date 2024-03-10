@@ -53,7 +53,6 @@ main {
   display: flex;
   flex-direction: row; /* Make the main content items display side by side */
   justify-content: center; /* Horizontally center the items */
-  align-items: center; /* Vertically center the items */
   text-align: center; /* Center the text within the container */
 }
 
