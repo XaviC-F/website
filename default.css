@@ -46,6 +46,11 @@ nav {
   align-items: center;
 }
 
+footer {
+  font-size: 0.5em;
+  text-align: center;
+}
+
 h2 {
   text-align: center;
   font-size: 2em;
