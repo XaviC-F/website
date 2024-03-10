@@ -49,17 +49,35 @@ h2 {
   font-size: 2em;
 }
 
+main {
+  display: flex;
+  flex-direction: row; /* Make the main content items display side by side */
+  justify-content: center; /* Horizontally center the items */
+  align-items: center; /* Vertically center the items */
+  text-align: center; /* Center the text within the container */
+}
+
 .image-container {
+  flex: 1; /* Let the image container take up remaining space */
+
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .image-container img {
+  max-width: 100%; /* Ensure the image takes up the available width */
+  height: auto; /* Allow the height to adjust automatically */
+  
   max-width: 50%;
   height: auto;
   margin: 5px;
   object-fit: cover;
+}
+
+.main-content {
+  flex: 1; /* Let the text content take up remaining space */
+  margin: 0 20px; /* Add some spacing between image and text */
 }
 
 .nav-button {
