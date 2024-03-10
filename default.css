@@ -51,11 +51,7 @@ h2 {
   font-size: 2em;
 }
 
-main {
-  display: flex;
-  flex-direction: row; /* Make the main content items display side by side */
-  justify-content: center; /* Horizontally center the items */
-}
+
 
 .image-container {
   flex: 1; /* Let the image container take up remaining space */
