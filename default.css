@@ -1,6 +1,30 @@
+/*
+Use the 80/20 design rule, with 80% neutral and 20% special.
+
+Colours:
+Background colour = #ffffff
+
+Main colour = rgb(
+Light version = rgb(
+Dark version = rgb(
+
+Secondary colour = rgb(
+
+Accent colour = rgb(
+
+Neutral pallete:
+1 = black
+2 = #3f3f3f
+3 = #5f5f5f
+4 = #afafaf
+5 = #dfdfdf
+6 = #f0f0f0
+7 = white
+*/
+
 body {
   margin: 0;
-  background-color:rgb(159, 213, 215);
+  background-color:white;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
   margin: 0 auto;
@@ -10,7 +34,6 @@ body {
 
 header {
   text-align: center;
-  font-family: Lora, "Source Serif 4", serif;
   font-size: 2.5em;
   font-weight: bold;
   margin-top: 5px; /* Remove top margin */
@@ -19,13 +42,10 @@ header {
 
 nav {
   text-align: center;
-  font: bold;
 }
 
 h2 {
   text-align: center;
-  font-family: Lora, "Source Serif 4", serif;
-  font-style: italic;
   font-size: 2em;
 }
 
