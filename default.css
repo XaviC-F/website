@@ -159,7 +159,9 @@ h2 {
   .image-wrapper {
     flex-basis: calc(50% - 10px); /* Set the width of each image wrapper to half of the container width */
     margin: 5px; /* Adjust as needed */
-    flex-basis: 100%;
+    flex: 1 0;
+    height: auto;
+    margin: 0;
   }
 
   /*
@@ -174,13 +176,7 @@ h2 {
     height: auto; /* Allow the height to adjust automatically */
     margin-bottom: 10px; /* Adjust as needed */
   }
-  /*
-  .image-wrapper {
-    flex: 1 0 100%;
-    height: auto;
-    margin: 0;
-  }
-  */
+  
   .image-wrapper img {
     max-width: 60%;
     height: 60%;
