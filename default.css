@@ -159,4 +159,10 @@ h2 {
     height: auto; /* Allow height to adjust automatically */
     margin: 0; /* Remove margin */
   }
+
+  .image-wrapper img {
+    max-width: 60%;
+    height: 60%;
+    object-fit: cover;
+  }
 }
