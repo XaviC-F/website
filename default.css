@@ -153,4 +153,10 @@ h2 {
     height: auto; /* Allow the height to adjust automatically */
     margin-bottom: 10px; /* Adjust as needed */
   }
+
+  .image-wrapper {
+    flex: 1 0 100%; /* Make each image wrapper take full width on mobile */
+    height: auto; /* Allow height to adjust automatically */
+    margin: 0; /* Remove margin */
+  }
 }
