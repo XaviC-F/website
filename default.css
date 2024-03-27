@@ -121,7 +121,6 @@ h2 {
   }
 
   .image-container p {
-    align-self: center;
     text-align: center; /* Center the caption text */
     margin: 0; /* Remove default margins */
   }
