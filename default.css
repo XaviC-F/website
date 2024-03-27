@@ -173,12 +173,6 @@ h2 {
     margin: 0;
   }
 
-  /*
-  .image-wrapper {
-    flex-basis: 100%;
-  }
-  */
-
   .image-container img {
     width: 100%; /* Set the width to 100% on smaller screens */
     max-width: none; /* Remove the maximum width restriction */
