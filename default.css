@@ -1,43 +1,16 @@
-/*
-Use the 80/20 design rule, with 80% neutral and 20% special.
-
-Colours:
-Background colour = #ffffff
-
-Main colour = rgb(
-Light version = rgb(
-Dark version = rgb(
-
-Secondary colour = rgb(
-
-Accent colour = rgb(
-
-Neutral pallete:
-1 = black
-2 = #3f3f3f
-3 = #5f5f5f
-4 = #afafaf
-5 = #dfdfdf
-6 = #f0f0f0
-7 = white
-*/
-
 body {
   margin: 0;
-  background-color:rgb(254, 255, 249);
+  background-color: #FEFFF9;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 60%;
   margin: 0 auto;
-  margin-bottom: 0px;
-  margin-top: 0px;
 }
 
 header {
   text-align: center;
   font-size: 2.5em;
   font-weight: bold;
-  margin-top: 0px;
-  margin-bottom: 0px;
+  margin: 0;
 }
 
 nav {
@@ -58,21 +31,20 @@ h2 {
 
 .main-two-columns {
   display: flex;
-  flex-direction: row; /* Make the main content items display side by side */
-  justify-content: center; /* Horizontally center the items */
+  flex-direction: row;
+  justify-content: center;
 }
 
 .image-container {
-  flex: 1; /* Let the image container take up remaining space */
-
+  flex: 1;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .image-container img {
-  max-width: 75%; /* Ensure the image takes up the available width */
-  height: auto; /* Allow the height to adjust automatically */
+  max-width: 75%;
+  height: auto;
   margin: 5px;
   object-fit: cover;
 }
@@ -80,7 +52,6 @@ h2 {
 .image-wrapper {
   height: 300px;
   margin: 5px;
-  margin-top: 0; /* Remove top margin */
   align-self: center;
 }
 
@@ -91,26 +62,23 @@ h2 {
 }
 
 .main-content {
-  flex: 1; /* Let the text content take up remaining space */
-  margin: 0 20px; /* Add some spacing between image and text */
+  flex: 1;
+  margin: 0 20px;
 }
 
 .nav-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #007bff88; /* Default button color */
+  background-color: #007bff88;
   color: white;
-
   text-align: center;
   text-decoration: none;
   border-radius: 5px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-right: 10px; /* Adjust as needed */
+  margin: 10px;
 }
 
 .nav-button:hover {
-  background-color: #0057b3e4; /* Button color on hover */
+  background-color: #0057b3e4;
 }
 
 @media (max-width: 768px) {
@@ -127,57 +95,44 @@ h2 {
   }
 
   .main-two-columns {
-    flex-direction: column; /* Change to a vertical layout on smaller screens */
+    flex-direction: column;
   }
 
   .image-container {
-    order: 1; /* Change the order of the image container to appear after text */
+    order: 1;
   }
 
   .main-content {
-    order: 2; /* Change the order of the text content to appear before image */
+    order: 2;
   }
 
   .nav-button {
-    display: block; /* Display navigation buttons as block elements */
-
+    display: block;
     padding: 5px 10px;
-
     border-radius: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-right: 5px; /* Adjust as needed */
+    margin: 5px;
   }
 
-  
-
-  /*
-  .image-container {
-    flex-direction: row;
-    align-items: center;
-  }
-  */
   .image-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    flex-direction: row; /* Change to a vertical layout on smaller screens */
+    flex-direction: row;
   }
 
   .image-wrapper {
-    align-items:center;
-    flex-basis: calc(50% - 10px); /* Set the width of each image wrapper to half of the container width */
-    margin: 5px; /* Adjust as needed */
+    align-items: center;
+    flex-basis: calc(50% - 10px);
+    margin: 5px;
     flex: 1 0;
     height: auto;
-    margin: 0;
   }
 
   .image-container img {
-    width: 100%; /* Set the width to 100% on smaller screens */
-    max-width: none; /* Remove the maximum width restriction */
-    height: auto; /* Allow the height to adjust automatically */
-    margin-bottom: 10px; /* Adjust as needed */
+    width: 100%;
+    max-width: none;
+    height: auto;
+    margin-bottom: 10px;
   }
   
   .image-wrapper img {
