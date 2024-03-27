@@ -71,7 +71,7 @@ h2 {
 }
 
 .image-container img {
-  max-width: 60%; /* Ensure the image takes up the available width */
+  max-width: 75%; /* Ensure the image takes up the available width */
   height: auto; /* Allow the height to adjust automatically */
   margin: 5px;
   object-fit: cover;
