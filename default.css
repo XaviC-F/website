@@ -120,6 +120,11 @@ h2 {
     flex-direction: row;
   }
 
+  .image-container p {
+    text-align: center; /* Center the caption text */
+    margin: 0; /* Remove default margins */
+  }
+  
   .image-wrapper {
     align-items: center;
     flex-basis: calc(50% - 10px);
