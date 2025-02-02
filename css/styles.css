@@ -4,3 +4,7 @@ html, body {
     width: 60%;
     margin: 0 auto;
 }
+
+h1 {
+    text-align: center;
+}
