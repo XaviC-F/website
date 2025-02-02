@@ -1,0 +1,78 @@
+:root {
+    /* Shared Colors */
+    --yellow:  #b58900;
+    --orange:  #cb4b16;
+    --red:     #dc322f;
+    --magenta: #d33682;
+    --violet:  #6c71c4;
+    --blue:    #268bd2;
+    --cyan:    #2aa198;
+    --green:   #859900;
+
+    /* Light Theme Colors (default) */
+    --bg: #fdf6e3;
+    --bg-alt: #eee8d5;
+    --content: #657b83;
+    --content-alt: #586e75;
+    --content-emp: #93a1a1;
+}
+
+/* Dark Theme Colors */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #002b36;
+        --bg-alt: #073642;
+        --content: #839496;
+        --content-alt: #93a1a1;
+        --content-emp: #586e75;
+    }
+}
+
+/* Basic Elements */
+body {
+    background-color: var(--bg);
+    color: var(--content);
+    line-height: 1.5;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+a {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--violet);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--content-alt);
+}
+
+pre, code {
+    background-color: var(--bg-alt);
+    color: var(--content-alt);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+input, textarea {
+    background-color: var(--bg-alt);
+    color: var(--content);
+    border: 1px solid var(--content-emp);
+    padding: 0.5em;
+    border-radius: 3px;
+}
+
+/* Optional: Smooth transitions between modes */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input, pre, code, h1, h2, h3, h4, h5, h6 {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
