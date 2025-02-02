@@ -3,6 +3,7 @@ html, body {
     min-height: 100vh;
     width: 60%;
     margin: 0 auto;
+    text-align: justify;
 }
 
 h1 {
