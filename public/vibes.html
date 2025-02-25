@@ -83,7 +83,8 @@
                     imageEntries = shuffleArray(imageEntries);
                     
                     // Get container dimensions
-                    const containerWidth = container.getBoundingClientRect().width;
+                                        // Use the accurately measured container width for all calculations
+                            const containerWidth = actualContainerWidth;
                     
                     // This scaling approach uses the exact method from your reference code
                     const pairs = imageEntries.map(([filename, [w, h]]) => {
@@ -351,8 +352,12 @@
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
-                // Get container width
-                const containerWidth = container.clientWidth;
+                // Force container to match window width exactly
+                container.style.width = 'calc(100vw - 40px)'; // Account for 20px padding on each side
+                container.style.maxWidth = 'calc(100vw - 40px)';
+                
+                // Get ACCURATE container width using getBoundingClientRect
+                const containerWidth = container.getBoundingClientRect().width;
                 
                 // Apply mobile sizing to images
                 images.forEach((img, index) => {
@@ -389,8 +394,16 @@
                     // Ensure it stays within column bounds
                     left = Math.min(left, (column + 1) * columnWidth - width - padding);
                     
+                    // Final boundary check before applying position
+                    if (left + width > containerWidth) {
+                        left = containerWidth - width - 10;
+                    }
+                    
                     // Update position (only horizontal, vertical will be fixed later)
                     img.style.left = `${left}px`;
+                    
+                    // Debug log to check if any images exceed boundary
+                    // console.log(`Image ${index}: left=${left}, width=${width}, right edge=${left+width}, container=${containerWidth}`);
                 });
                 
                 // Fix overlaps and improve distribution
