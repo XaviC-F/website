@@ -42,10 +42,10 @@
                 font-size: 14px; /* Smaller text on mobile */
             }
             #container img {
-                position: relative !important;
+                position: absolute !important;
                 left: 0 !important;
                 top: auto !important;
-                width: 100% !important;
+                width: auto !important;
                 height: auto !important;
                 margin-bottom: 10px;
             }
@@ -202,7 +202,101 @@
                     container.innerHTML = '<p>Error loading images.</p>';
                     hideLoading();
                 });
-        }); 
+
+                function handleMobileLayout() {
+                    const isMobile = window.innerWidth <= 768;
+                    
+                    if (isMobile) {
+                        // Get all images
+                        const images = document.querySelectorAll('#container img');
+                        // Get container width
+                        const containerWidth = container.clientWidth;
+                        
+                        // Clear existing positions
+                        let positions = [];
+                        
+                        // Maximum width for mobile is 70% of container
+                        const mobileMaxWidth = containerWidth * 0.7;
+                        
+                        // Reset container height
+                        let maxBottom = 0;
+                        
+                        // Reposition all images for mobile
+                        images.forEach((img, index) => {
+                            // Get current dimensions
+                            let width = parseInt(img.style.width);
+                            let height = parseInt(img.style.height);
+                            
+                            // Scale down if wider than mobile max width
+                            if (width > mobileMaxWidth) {
+                                const scale = mobileMaxWidth / width;
+                                width = Math.floor(width * scale);
+                                height = Math.floor(height * scale);
+                                
+                                img.style.width = `${width}px`;
+                                img.style.height = `${height}px`;
+                            }
+                            
+                            // Find a position using a more vertical-focused algorithm
+                            let found = false;
+                            let top = 0;
+                            let left = 0;
+                            
+                            // Try to place starting from the top, slightly randomizing horizontal position
+                            while (!found) {
+                                // Randomize horizontal position but keep within container
+                                left = Math.floor(Math.random() * (containerWidth - width));
+                                
+                                // Check for overlaps
+                                let overlaps = false;
+                                for (const pos of positions) {
+                                    const [posLeft, posTop, posWidth, posHeight] = pos;
+                                    if (
+                                        left < posLeft + posWidth &&
+                                        left + width > posLeft &&
+                                        top < posTop + posHeight &&
+                                        top + height > posTop
+                                    ) {
+                                        overlaps = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!overlaps) {
+                                    found = true;
+                                } else {
+                                    // If overlap, try moving down by a small increment
+                                    top += 20;
+                                }
+                            }
+                            
+                            // Update image position
+                            img.style.left = `${left}px`;
+                            img.style.top = `${top}px`;
+                            
+                            // Store the position
+                            positions.push([left, top, width, height]);
+                            
+                            // Update max bottom
+                            const bottom = top + height;
+                            if (bottom > maxBottom) {
+                                maxBottom = bottom;
+                            }
+                        });
+                        
+                        // Update container height
+                        container.style.height = `${maxBottom + 20}px`;
+                    }
+                }
+                
+                // Add window resize listener
+                window.addEventListener('resize', handleMobileLayout);
+        });
+
+        window.addEventListener('load', () => {
+            // This timeout allows all images to be placed first
+            setTimeout(handleMobileLayout, 500);
+        });
     </script>
 </body>
 </html>
