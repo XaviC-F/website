@@ -125,8 +125,8 @@
                         
                         // Apply mobile scaling immediately if needed
                         if (isMobile) {
-                            // Consistent scaling for mobile - images take up 30-45% of screen width max
-                            const maxMobileWidth = containerWidth * (0.3 + Math.random() * 0.15);
+                            // Consistent scaling for mobile - images take up 40-55% of screen width max
+                            const maxMobileWidth = containerWidth * (0.4 + Math.random() * 0.15);
                             if (w > maxMobileWidth) {
                                 const scale = maxMobileWidth / w;
                                 w = Math.floor(w * scale);
