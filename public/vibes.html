@@ -64,123 +64,145 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('container');
-
-            // Shuffle array function
+            
+            // Add loading indicator
+            const loadingElement = document.createElement('div');
+            loadingElement.id = 'loading';
+            loadingElement.textContent = 'Loading images...';
+            container.appendChild(loadingElement);
+            
+            function hideLoading() {
+                const loader = document.getElementById('loading');
+                if (loader) loader.remove();
+            }
+            
+            // Function to shuffle array
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [array[i], array[j]] = [array[j], array[i]];
                 }
-                return array;
+                return array; // Return the shuffled array
             }
-
+            
             // Fetch the metadata
             fetch('/image-metadata.json')
                 .then(response => response.json())
                 .then(data => {
-                    // Convert to array and shuffle
-                    let imageEntries = shuffleArray(Object.entries(data));
-                    const containerWidth = container.clientWidth;
+                    // Convert object to array of [filename, [width, height]] entries
+                    let imageEntries = Object.entries(data);
+                    imageEntries = shuffleArray(imageEntries);
                     
-                    // Position the images
-                    const positions = [];
+                    // Get container dimensions
+                    const rect = container.getBoundingClientRect();
+                    const containerWidth = rect.width;
                     
-                    // Replace the current resize code with this:
-                    imageEntries.forEach(([filename, [originalWidth, originalHeight]]) => {
-                        // Apply proper resizing with aspect ratio preservation
-                        let targetWidth, targetHeight;
+                    // Calculate resized dimensions for each image
+                    const pairs = imageEntries.map(([filename, [w, h]]) => {
+                        let goal_pixels = 600 * 400;
+                        let actual_pixels = w * h;
                         
-                        // Maximum width should be 50% of container
-                        const maxWidth = containerWidth * 0.5;
-                        
-                        // Calculate the scale factor based on original width
-                        const scaleFactor = (originalWidth > maxWidth) ? (maxWidth / originalWidth) : 0.8;
-                        
-                        // Apply the scale factor to both dimensions
-                        targetWidth = Math.floor(originalWidth * scaleFactor);
-                        targetHeight = Math.floor(originalHeight * scaleFactor);
-                        
-                        // Hard cap for very large images
-                        if (targetHeight > 800) {
-                            const heightScaleFactor = 800 / targetHeight;
-                            targetHeight = 800;
-                            targetWidth = Math.floor(targetWidth * heightScaleFactor);
+                        // Progressive scaling based on image size
+                        if (actual_pixels / goal_pixels > 16) {
+                            return [parseInt(w / 8), parseInt(h / 8)];
+                        }
+                        if (actual_pixels / goal_pixels > 4) {
+                            return [parseInt(w / 4), parseInt(h / 4)];
+                        }
+                        if (actual_pixels / goal_pixels > 2) {
+                            return [parseInt(w / 2), parseInt(h / 2)];
+                        } 
+                        if (actual_pixels / goal_pixels < 0.5) {
+                            return [parseInt(w * 2), parseInt(h * 2)];
                         }
                         
-                        // Continue with position finding...
+                        // Default case - keep original size
+                        return [parseInt(w), parseInt(h)];
+                    });
+                    
+                    // Position the images
+                    let positions = [];
+                    let i = 0;
+                    
+                    // Use an interval to place images one by one (gives a nice animation effect)
+                    let interval = setInterval(() => {
+                        if (i >= imageEntries.length) {
+                            clearInterval(interval);
+                            hideLoading();
+                            return;
+                        }
                         
-                        let foundPosition = false;
-                        let attempts = 0;
-                        let minTop = 0;
+                        let height = 600;
+                        let [w, h] = pairs[i];
+                        let found_place = false;
                         
-                        // Try to find a non-overlapping position
-                        while (!foundPosition && attempts < 50) {
-                            const maxLeft = containerWidth - targetWidth;
-                            const left = Math.floor(Math.random() * maxLeft);
-                            const top = Math.floor(Math.random() * 500) + minTop;
+                        // Find a position that doesn't overlap with existing images
+                        while (!found_place) {
+                            let w_max = containerWidth - w;
+                            let h_max = height - h;
                             
-                            // Check for overlap
-                            let overlaps = false;
-                            for (const pos of positions) {
-                                if (
-                                    left < pos.left + pos.width &&
-                                    left + targetWidth > pos.left &&
-                                    top < pos.top + pos.height &&
-                                    top + targetHeight > pos.top
-                                ) {
-                                    overlaps = true;
+                            // Try multiple random positions
+                            for (let attempt = 0; attempt < 50; attempt++) {
+                                let a_left = Math.random() * w_max;
+                                let a_top = Math.random() * h_max;
+                                let a_right = a_left + w;
+                                let a_bottom = a_top + h;
+                                
+                                let intersects = false;
+                                
+                                // Check for intersection with existing images
+                                for (let j = 0; j < positions.length; j++) {
+                                    let [b_left, b_top] = positions[j];
+                                    let b_right = b_left + pairs[j][0];
+                                    let b_bottom = b_top + pairs[j][1];
+                                    
+                                    if (a_left < b_right && a_right > b_left && a_bottom > b_top && a_top < b_bottom) {
+                                        intersects = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!intersects) {
+                                    found_place = true;
+                                    positions.push([parseInt(a_left), parseInt(a_top)]);
                                     break;
                                 }
                             }
                             
-                            if (!overlaps) {
-                                // No overlap, use this position
-                                positions.push({
-                                    left,
-                                    top,
-                                    width: targetWidth,
-                                    height: targetHeight
-                                });
-                                
-                                // Create and append the image
-                                const imgElement = document.createElement('img');
-                                imgElement.src = `/images/${filename}`;
-                                imgElement.style.position = 'absolute';
-                                imgElement.style.left = `${left}px`;
-                                imgElement.style.top = `${top}px`;
-                                imgElement.style.width = `${targetWidth}px`;
-                                imgElement.style.height = `${targetHeight}px`;
-                                imgElement.loading = 'lazy';
-                                
-                                container.appendChild(imgElement);
-                                foundPosition = true;
-                            }
-                            
-                            attempts++;
-                            
-                            if (attempts >= 50) {
-                                minTop += 100;
-                                attempts = 0;
+                            // If we couldn't find a place, increase the height and try again
+                            if (!found_place) {
+                                height += 50;
                             }
                         }
-                    });
-                    
-                    // Set container height
-                    let maxBottom = 0;
-                    positions.forEach(pos => {
-                        const bottom = pos.top + pos.height;
-                        if (bottom > maxBottom) {
-                            maxBottom = bottom;
+                        
+                        // Create and position the image
+                        let img = document.createElement("img");
+                        img.src = `/images/${imageEntries[i][0]}`; // Adjust path for your file structure
+                        img.width = pairs[i][0];
+                        img.height = pairs[i][1];
+                        img.style.width = `${pairs[i][0]}px`;
+                        img.style.height = `${pairs[i][1]}px`;
+                        img.style.position = "absolute";
+                        img.style.top = `${positions[i][1]}px`;
+                        img.style.left = `${positions[i][0]}px`;
+                        img.loading = "lazy"; // Enable lazy loading
+                        
+                        container.appendChild(img);
+                        i++;
+                        
+                        // If this is the last image, clear the interval
+                        if (i === imageEntries.length) {
+                            clearInterval(interval);
+                            hideLoading();
                         }
-                    });
-                    
-                    container.style.minHeight = `${maxBottom + 100}px`;
+                    }, 100); // 100ms between placing each image
                 })
                 .catch(error => {
-                    console.error('Error setting up the image collage:', error);
+                    console.error('Error loading images:', error);
                     container.innerHTML = '<p>Error loading images.</p>';
+                    hideLoading();
                 });
-        });
+        }); 
     </script>
 </body>
 </html>
