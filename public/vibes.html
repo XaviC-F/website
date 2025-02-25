@@ -55,7 +55,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+       document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('container');
             let isMobile = window.innerWidth <= 768;
             
@@ -357,8 +357,8 @@
                     
                     const original = originalPositions[index];
                     
-                    // Make images smaller for mobile (30-45% of container width max)
-                    const maxWidth = containerWidth * (0.3 + Math.random() * 0.15);
+                    // Make images bigger for mobile (40-55% of container width max)
+                    const maxWidth = containerWidth * (0.4 + Math.random() * 0.15);
                     let width = original.width;
                     let height = original.height;
                     
