@@ -71,9 +71,6 @@
                 return array;
             }
             
-            // Global positions array that can be accessed by different functions
-            let globalPositions = [];
-            
             // Fetch the metadata
             fetch('/image-metadata.json')
                 .then(response => response.json())
@@ -83,8 +80,7 @@
                     imageEntries = shuffleArray(imageEntries);
                     
                     // Get container dimensions
-                    const rect = container.getBoundingClientRect();
-                    const containerWidth = rect.width;
+                    const containerWidth = container.getBoundingClientRect().width;
                     
                     // This scaling approach uses the exact method from your reference code
                     const pairs = imageEntries.map(([filename, [w, h]]) => {
@@ -95,30 +91,27 @@
                         
                         // Apply progressive scaling tiers exactly as in reference code
                         if (ratio > 16) {
-                            // Very large images - scale down to 1/8
                             return [Math.floor(w/8), Math.floor(h/8)];
                         }
                         if (ratio > 4) {
-                            // Large images - scale down to 1/4
                             return [Math.floor(w/4), Math.floor(h/4)];
                         }
                         if (ratio > 2) {
-                            // Medium-large images - scale down to 1/2
                             return [Math.floor(w/2), Math.floor(h/2)];
                         }
                         if (ratio < 0.5) {
-                            // Very small images - scale up to 2x
                             return [Math.floor(w*2), Math.floor(h*2)];
                         }
                         
-                        // Default case - keep original size
                         return [w, h];
                     });
                     
                     // Position the images
                     let positions = [];
-                    globalPositions = positions; // Store in global for other functions to access
                     let i = 0;
+                    
+                    // Calculate max width needed for desktop layout (for proper mobile scaling later)
+                    const maxDesktopWidth = 1600; // More realistic assumption than 1200px
                     
                     // Use an interval to place images one by one
                     let interval = setInterval(() => {
@@ -129,6 +122,18 @@
                         
                         let height = 600;
                         let [w, h] = pairs[i];
+                        
+                        // Apply mobile scaling immediately if needed
+                        if (isMobile) {
+                            // Consistent scaling for mobile - images take up 30-45% of screen width max
+                            const maxMobileWidth = containerWidth * (0.3 + Math.random() * 0.15);
+                            if (w > maxMobileWidth) {
+                                const scale = maxMobileWidth / w;
+                                w = Math.floor(w * scale);
+                                h = Math.floor(h * scale);
+                            }
+                        }
+                        
                         let found_place = false;
                         
                         // Find a position that doesn't overlap with existing images
@@ -138,7 +143,25 @@
                             
                             // Try multiple random positions
                             for (let attempt = 0; attempt < 50; attempt++) {
-                                let a_left = Math.random() * w_max;
+                                // For mobile, use a distribution strategy that better utilizes screen width
+                                let a_left;
+                                if (isMobile) {
+                                    // Divide screen into 3 columns and place in one of them
+                                    const column = Math.floor(Math.random() * 3); // 0, 1, or 2
+                                    const columnWidth = containerWidth / 3;
+                                    // Calculate position within column with padding
+                                    const padding = Math.floor(columnWidth * 0.1);
+                                    const availableWidth = columnWidth - padding * 2;
+                                    // Ensure image fits in column
+                                    const maxPositionInColumn = Math.max(0, columnWidth - w - padding);
+                                    // Random position within column
+                                    a_left = (column * columnWidth) + padding + 
+                                            (Math.random() * Math.min(availableWidth, maxPositionInColumn));
+                                } else {
+                                    // Desktop - use full random placement
+                                    a_left = Math.random() * w_max;
+                                }
+                                
                                 let a_top = Math.random() * h_max;
                                 
                                 let a_right = a_left + w;
@@ -148,9 +171,9 @@
                                 
                                 // Check for intersection with existing images
                                 for (let j = 0; j < positions.length; j++) {
-                                    let [b_left, b_top] = positions[j];
-                                    let b_right = b_left + pairs[j][0];
-                                    let b_bottom = b_top + pairs[j][1];
+                                    let [b_left, b_top, b_width, b_height] = positions[j];
+                                    let b_right = b_left + b_width;
+                                    let b_bottom = b_top + b_height;
                                     
                                     if (a_left < b_right && a_right > b_left && a_bottom > b_top && a_top < b_bottom) {
                                         intersects = true;
@@ -160,7 +183,7 @@
                                 
                                 if (!intersects) {
                                     found_place = true;
-                                    positions.push([parseInt(a_left), parseInt(a_top)]);
+                                    positions.push([parseInt(a_left), parseInt(a_top), w, h]);
                                     break;
                                 }
                             }
@@ -174,73 +197,39 @@
                         // Create and position the image
                         let img = document.createElement("img");
                         img.src = `/images/${imageEntries[i][0]}`;
-                        img.width = pairs[i][0];
-                        img.height = pairs[i][1];
-                        img.style.width = `${pairs[i][0]}px`;
-                        img.style.height = `${pairs[i][1]}px`;
+                        img.width = w;
+                        img.height = h;
+                        img.style.width = `${w}px`;
+                        img.style.height = `${h}px`;
                         img.style.position = "absolute";
                         img.style.top = `${positions[i][1]}px`;
                         img.style.left = `${positions[i][0]}px`;
                         img.loading = "lazy";
                         
-                        // Store dimensions as data attributes for mobile layout
-                        img.dataset.width = pairs[i][0];
-                        img.dataset.height = pairs[i][1];
-                        
-                    // Store original position for future reference
+                        // Store original position for future reference
                         originalPositions.push({
                             id: i,
                             left: positions[i][0],
                             top: positions[i][1],
-                            width: pairs[i][0],
-                            height: pairs[i][1]
+                            width: w,
+                            height: h
                         });
-                        
-                        // If on mobile, apply mobile layout immediately
-                        if (isMobile) {
-                            // Apply mobile size constraints
-                            const maxWidth = containerWidth * (0.3 + Math.random() * 0.1);
-                            if (pairs[i][0] > maxWidth) {
-                                const scale = maxWidth / pairs[i][0];
-                                img.style.width = `${Math.floor(pairs[i][0] * scale)}px`;
-                                img.style.height = `${Math.floor(pairs[i][1] * scale)}px`;
-                            }
-                            
-                            // Ensure we use the full width of the container on mobile
-                            // This helps prevent LHS bias
-                            let adjustedLeft = positions[i][0];
-                            // Redistribute position across the width more evenly
-                            if (containerWidth < 500) { // Narrow mobile screens
-                                // Spread the images more evenly across the container width
-                                // Map the original position to a wider range
-                                const originalPosPercentage = positions[i][0] / 1200; // Assuming desktop width ~1200px
-                                adjustedLeft = Math.floor(originalPosPercentage * (containerWidth - img.width));
-                                
-                                // Add a little randomness for visual interest
-                                adjustedLeft += Math.floor(Math.random() * 20) - 10;
-                                
-                                // Ensure it stays in bounds
-                                adjustedLeft = Math.max(0, Math.min(containerWidth - img.width, adjustedLeft));
-                                
-                                img.style.left = `${adjustedLeft}px`;
-                            }
-                        }
                         
                         container.appendChild(img);
                         i++;
                         
                         // If this is the last image and we're on mobile, fix overlaps
                         if (i === imageEntries.length && isMobile) {
-                            setTimeout(fixMobileOverlaps, 100);
+                            setTimeout(fixMobileLayout, 100);
                         }
-                    }, 100);
+                    }, 50); // Faster interval for better UX
                 })
                 .catch(error => {
                     console.error('Error loading images:', error);
                 });
 
-            // Function to fix overlaps in mobile view without changing horizontal positions
-            function fixMobileOverlaps() {
+            // Function to fix both vertical overlaps and improve horizontal distribution
+            function fixMobileLayout() {
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
@@ -270,7 +259,34 @@
                     maxBottom = Math.max(maxBottom, top + height);
                 });
                 
-                // Fix overlaps
+                // First, improve horizontal distribution if images are clustered
+                const leftPositions = positions.map(p => p.left);
+                const rightPositions = positions.map(p => p.left + p.width);
+                
+                // Calculate occupied width percentage
+                const leftmostPosition = Math.min(...leftPositions);
+                const rightmostPosition = Math.max(...rightPositions);
+                const usedWidth = rightmostPosition - leftmostPosition;
+                const widthPercentage = usedWidth / containerWidth;
+                
+                // If images are using less than 80% of screen width, redistribute horizontally
+                if (widthPercentage < 0.8) {
+                    // Calculate scale factor to occupy more space
+                    const scaleFactor = 0.9 / widthPercentage; // Target 90% usage
+                    
+                    positions.forEach(p => {
+                        // Calculate new position relative to leftmost image
+                        const relativePosition = p.left - leftmostPosition;
+                        const newRelativePosition = relativePosition * scaleFactor;
+                        
+                        // Apply new position with padding
+                        const paddingLeft = containerWidth * 0.05; // 5% padding from left
+                        p.element.style.left = `${paddingLeft + newRelativePosition}px`;
+                        p.left = paddingLeft + newRelativePosition;
+                    });
+                }
+                
+                // Then fix vertical overlaps
                 let changed = true;
                 let iterations = 0;
                 const maxIterations = 50;
@@ -311,28 +327,41 @@
                 container.style.minHeight = `${maxBottom + 30}px`;
             }
             
-            // Define the handleMobileLayout function 
-            function handleMobileLayout() {
-                if (!isMobile) return;
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                const wasMobile = isMobile;
+                isMobile = window.innerWidth <= 768;
                 
+                // Only reposition if switching between mobile and desktop
+                if (wasMobile !== isMobile) {
+                    if (isMobile) {
+                        // Apply mobile layout
+                        applyMobileLayout();
+                    } else {
+                        // Restore desktop layout
+                        restoreDesktopLayout();
+                    }
+                }
+            });
+            
+            function applyMobileLayout() {
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
                 // Get container width
                 const containerWidth = container.clientWidth;
                 
-                // Apply mobile sizing to images but KEEP their horizontal positions
+                // Apply mobile sizing to images
                 images.forEach((img, index) => {
-                    // Get original position data
-                    const original = originalPositions[index] || null;
-                    if (!original) return;
+                    if (index >= originalPositions.length) return;
                     
-                    // Get current dimensions and position
+                    const original = originalPositions[index];
+                    
+                    // Make images smaller for mobile (30-45% of container width max)
+                    const maxWidth = containerWidth * (0.3 + Math.random() * 0.15);
                     let width = original.width;
                     let height = original.height;
                     
-                    // Make images smaller for mobile (30-40% of container width max)
-                    const maxWidth = containerWidth * (0.3 + Math.random() * 0.1);
                     if (width > maxWidth) {
                         const scale = maxWidth / width;
                         width = Math.floor(width * scale);
@@ -343,54 +372,40 @@
                     img.style.width = `${width}px`;
                     img.style.height = `${height}px`;
                     
-                    // Keep horizontal position but ensure it's visible and well-distributed
-                    let left = original.left;
+                    // For horizontal positioning, use column-based approach
+                    const column = index % 3; // 0, 1, or 2
+                    const columnWidth = containerWidth / 3;
+                    const padding = Math.floor(columnWidth * 0.1);
                     
-                    // For narrow mobile screens like iPhone, redistribute positions better
-                    if (containerWidth < 500) {
-                        // Map original desktop position to mobile viewport width
-                        const originalPosPercentage = original.left / 1200; // Assuming desktop width ~1200px
-                        left = Math.floor(originalPosPercentage * (containerWidth - width));
-                        
-                        // Add slight random variation
-                        left += Math.floor(Math.random() * 20) - 10;
-                    }
+                    // Calculate position within column with padding
+                    let left = (column * columnWidth) + padding;
                     
-                    // Ensure it's within bounds
-                    left = Math.max(0, Math.min(containerWidth - width, left));
+                    // Add some randomness within the column
+                    left += Math.floor(Math.random() * (columnWidth * 0.2));
                     
-                    // Update position (keep horizontal position, vertical will be fixed later)
+                    // Ensure it stays within column bounds
+                    left = Math.min(left, (column + 1) * columnWidth - width - padding);
+                    
+                    // Update position (only horizontal, vertical will be fixed later)
                     img.style.left = `${left}px`;
                 });
                 
-                // Fix overlaps
-                fixMobileOverlaps();
+                // Fix overlaps and improve distribution
+                setTimeout(fixMobileLayout, 100);
             }
             
-            // Handle window resize - this only triggers on actual viewport changes, not initial load
-            window.addEventListener('resize', () => {
-                const wasMobile = isMobile;
-                isMobile = window.innerWidth <= 768;
-                
-                // Only reposition if switching between mobile and desktop
-                if (wasMobile !== isMobile) {
-                    if (isMobile) {
-                        handleMobileLayout();
-                    } else {
-                        // Restore desktop layout using original positions
-                        const images = document.querySelectorAll('#container img');
-                        images.forEach((img, index) => {
-                            if (index < originalPositions.length) {
-                                const original = originalPositions[index];
-                                img.style.width = `${original.width}px`;
-                                img.style.height = `${original.height}px`;
-                                img.style.left = `${original.left}px`;
-                                img.style.top = `${original.top}px`;
-                            }
-                        });
+            function restoreDesktopLayout() {
+                const images = document.querySelectorAll('#container img');
+                images.forEach((img, index) => {
+                    if (index < originalPositions.length) {
+                        const original = originalPositions[index];
+                        img.style.width = `${original.width}px`;
+                        img.style.height = `${original.height}px`;
+                        img.style.left = `${original.left}px`;
+                        img.style.top = `${original.top}px`;
                     }
-                }
-            });
+                });
+            }
         });
     </script>
 </body>
