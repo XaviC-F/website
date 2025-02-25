@@ -203,61 +203,94 @@
                 // Get container width
                 const containerWidth = container.clientWidth;
                 
-                // Make images smaller on mobile - more aggressive scale down
-                const maxImageWidth = containerWidth * 0.45; // Allow two images side by side with margin
+                // Create array to track image positions
+                let positions = [];
+                let maxBottom = 0;
                 
-                // Variables to track current position
-                let currentY = 20;
-                let currentRowStartY = currentY;
-                let currentX = 20;
-                let maxHeightInRow = 0;
-                
-                // Reposition each image for mobile
+                // Process each image
                 images.forEach(img => {
-                    // Get dimensions
-                    let width = parseInt(img.dataset.width);
-                    let height = parseInt(img.dataset.height);
+                    // Get current dimensions
+                    let width = parseInt(img.dataset.width || img.width);
+                    let height = parseInt(img.dataset.height || img.height);
                     
-                    // Enforce maximum width while maintaining aspect ratio
-                    if (width > maxImageWidth) {
-                        const scale = maxImageWidth / width;
+                    // Make images smaller for mobile (30-40% of container width max)
+                    const maxWidth = containerWidth * (0.3 + Math.random() * 0.1);
+                    if (width > maxWidth) {
+                        const scale = maxWidth / width;
                         width = Math.floor(width * scale);
                         height = Math.floor(height * scale);
                     }
                     
-                    // Further scale down large images more aggressively
-                    // This helps create more variety in sizes while keeping them manageable
-                    if (height > containerWidth * 0.5) {
-                        const scale = (containerWidth * 0.5) / height;
-                        width = Math.floor(width * scale);
-                        height = Math.floor(height * scale);
-                    }
-                    
-                    // Update image size
+                    // Update size
                     img.style.width = `${width}px`;
                     img.style.height = `${height}px`;
                     
-                    // Check if this image can fit in the current row
-                    if (currentX + width > containerWidth - 20) {
-                        // Move to next row
-                        currentY = currentRowStartY + maxHeightInRow + 15;
-                        currentX = 20;
-                        currentRowStartY = currentY;
-                        maxHeightInRow = 0;
+                    // Keep existing position but ensure valid
+                    let left = parseInt(img.style.left) || 0;
+                    let top = parseInt(img.style.top) || 0;
+                    
+                    // Ensure image is fully visible horizontally
+                    if (left + width > containerWidth) {
+                        left = Math.max(0, containerWidth - width - 10);
                     }
                     
-                    // Position the image
-                    img.style.position = "absolute";
-                    img.style.left = `${currentX}px`;
-                    img.style.top = `${currentY}px`;
+                    // Add random offset to create more visual interest
+                    // This maintains the random feel while ensuring good spacing
+                    left = Math.max(0, Math.min(containerWidth - width, 
+                        left + (Math.random() * 60 - 30)));
                     
-                    // Update for next image
-                    currentX += width + 15; // Add 15px spacing between images
-                    maxHeightInRow = Math.max(maxHeightInRow, height);
+                    // Track position
+                    const position = { left, top, width, height };
+                    positions.push(position);
+                    
+                    // Update the image position
+                    img.style.position = "absolute";
+                    img.style.left = `${left}px`;
+                    img.style.top = `${top}px`;
+                    
+                    // Track maximum height
+                    maxBottom = Math.max(maxBottom, top + height);
                 });
                 
-                // Update container height to account for all images
-                container.style.minHeight = `${currentY + maxHeightInRow + 20}px`;
+                // Fix overlaps
+                let changed = true;
+                let iterations = 0;
+                const maxIterations = 50;
+                
+                // Keep adjusting overlapping images downward
+                while (changed && iterations < maxIterations) {
+                    changed = false;
+                    iterations++;
+                    
+                    // Check each pair of images for overlap
+                    for (let i = 0; i < positions.length; i++) {
+                        for (let j = 0; j < positions.length; j++) {
+                            if (i === j) continue;
+                            
+                            const a = positions[i];
+                            const b = positions[j];
+                            
+                            // Check if they overlap
+                            if (a.left < b.left + b.width && 
+                                a.left + a.width > b.left && 
+                                a.top < b.top + b.height && 
+                                a.top + a.height > b.top) {
+                                
+                                // Move the higher one down below the lower one
+                                if (a.top <= b.top) {
+                                    const newTop = b.top + b.height + 10 + Math.floor(Math.random() * 10);
+                                    images[i].style.top = `${newTop}px`;
+                                    a.top = newTop;
+                                    changed = true;
+                                    maxBottom = Math.max(maxBottom, newTop + a.height);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Update container height
+                container.style.minHeight = `${maxBottom + 30}px`;
             }
             
             // Call mobile layout after images are loaded
