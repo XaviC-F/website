@@ -202,7 +202,15 @@
                 
                 // Get container width
                 const containerWidth = container.clientWidth;
+                
+                // Make images smaller on mobile - more aggressive scale down
+                const maxImageWidth = containerWidth * 0.45; // Allow two images side by side with margin
+                
+                // Variables to track current position
                 let currentY = 20;
+                let currentRowStartY = currentY;
+                let currentX = 20;
+                let maxHeightInRow = 0;
                 
                 // Reposition each image for mobile
                 images.forEach(img => {
@@ -210,29 +218,46 @@
                     let width = parseInt(img.dataset.width);
                     let height = parseInt(img.dataset.height);
                     
-                    // Scale down if too wide
-                    if (width > containerWidth * 0.8) {
-                        const scale = containerWidth * 0.8 / width;
+                    // Enforce maximum width while maintaining aspect ratio
+                    if (width > maxImageWidth) {
+                        const scale = maxImageWidth / width;
                         width = Math.floor(width * scale);
                         height = Math.floor(height * scale);
-                        img.style.width = `${width}px`;
-                        img.style.height = `${height}px`;
                     }
                     
-                    // Center horizontally
-                    const left = Math.max(0, (containerWidth - width) / 2);
+                    // Further scale down large images more aggressively
+                    // This helps create more variety in sizes while keeping them manageable
+                    if (height > containerWidth * 0.5) {
+                        const scale = (containerWidth * 0.5) / height;
+                        width = Math.floor(width * scale);
+                        height = Math.floor(height * scale);
+                    }
                     
-                    // Position vertically
+                    // Update image size
+                    img.style.width = `${width}px`;
+                    img.style.height = `${height}px`;
+                    
+                    // Check if this image can fit in the current row
+                    if (currentX + width > containerWidth - 20) {
+                        // Move to next row
+                        currentY = currentRowStartY + maxHeightInRow + 15;
+                        currentX = 20;
+                        currentRowStartY = currentY;
+                        maxHeightInRow = 0;
+                    }
+                    
+                    // Position the image
                     img.style.position = "absolute";
-                    img.style.left = `${left}px`;
+                    img.style.left = `${currentX}px`;
                     img.style.top = `${currentY}px`;
                     
                     // Update for next image
-                    currentY += height + 20;
+                    currentX += width + 15; // Add 15px spacing between images
+                    maxHeightInRow = Math.max(maxHeightInRow, height);
                 });
                 
-                // Update container height
-                container.style.minHeight = `${currentY}px`;
+                // Update container height to account for all images
+                container.style.minHeight = `${currentY + maxHeightInRow + 20}px`;
             }
             
             // Call mobile layout after images are loaded
