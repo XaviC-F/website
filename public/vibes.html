@@ -14,6 +14,7 @@
         h1 {
             margin-bottom: 30px;
             text-align: left;
+            font-size: 32px; /* Desktop size */
         }
         img {
             border: 1px solid #ddd;
@@ -24,6 +25,29 @@
         #container {
             position: relative;
             min-height: 100vh;
+        }
+        /* Add this for mobile support */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px; /* Less padding on mobile */
+            }
+            
+            h1 {
+                font-size: 24px; /* Smaller heading on mobile */
+                margin-bottom: 15px; /* Less margin on mobile */
+            }
+            
+            p, div {
+                font-size: 14px; /* Smaller text on mobile */
+            }
+            #container img {
+                position: relative !important;
+                left: 0 !important;
+                top: auto !important;
+                width: 100% !important;
+                height: auto !important;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
@@ -61,10 +85,29 @@
                     // Position the images
                     const positions = [];
                     
-                    imageEntries.forEach(([filename, [width, height]]) => {
-                        // Resize to reasonable dimensions
-                        const targetWidth = Math.min(width, containerWidth * 0.5);
-                        const targetHeight = height * (targetWidth / width);
+                    // Replace the current resize code with this:
+                    imageEntries.forEach(([filename, [originalWidth, originalHeight]]) => {
+                        // Apply proper resizing with aspect ratio preservation
+                        let targetWidth, targetHeight;
+                        
+                        // Maximum width should be 50% of container
+                        const maxWidth = containerWidth * 0.5;
+                        
+                        // Calculate the scale factor based on original width
+                        const scaleFactor = (originalWidth > maxWidth) ? (maxWidth / originalWidth) : 0.8;
+                        
+                        // Apply the scale factor to both dimensions
+                        targetWidth = Math.floor(originalWidth * scaleFactor);
+                        targetHeight = Math.floor(originalHeight * scaleFactor);
+                        
+                        // Hard cap for very large images
+                        if (targetHeight > 800) {
+                            const heightScaleFactor = 800 / targetHeight;
+                            targetHeight = 800;
+                            targetWidth = Math.floor(targetWidth * heightScaleFactor);
+                        }
+                        
+                        // Continue with position finding...
                         
                         let foundPosition = false;
                         let attempts = 0;
