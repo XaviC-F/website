@@ -52,11 +52,11 @@
     </style>
 </head>
 <body>
-    <h2>
+    <h1>
         inspired by alexey guzey and sophia:
         <a href="https://guzey.com/vibes/">https://guzey.com/vibes/</a>, 
         <a href="https://girl.surgery/website_vibes/">https://girl.surgery/website_vibes/</a>
-    </h2>
+    </h1>
     <div id="container">
         <!-- Images will be placed here by JavaScript -->
     </div>
@@ -64,17 +64,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('container');
-            
-            // Add loading indicator
-            const loadingElement = document.createElement('div');
-            loadingElement.id = 'loading';
-            loadingElement.textContent = 'Loading images...';
-            container.appendChild(loadingElement);
-            
-            function hideLoading() {
-                const loader = document.getElementById('loading');
-                if (loader) loader.remove();
-            }
             
             // Function to shuffle array
             function shuffleArray(array) {
