@@ -303,7 +303,7 @@
                                 const smallerArea = Math.min(aArea, bArea);
                                 
                                 // Only fix if overlap is more than 50% of the smaller image
-                                if (overlapArea > smallerArea * 0.2) {
+                                if (overlapArea > smallerArea * 0.1) {
                                     // Move the higher one down below the lower one
                                     if (a.top <= b.top) {
                                         const newTop = b.top + b.height + 5;
