@@ -41,14 +41,6 @@
             p, div {
                 font-size: 14px; /* Smaller text on mobile */
             }
-            #container img {
-                position: absolute !important;
-                left: 0 !important;
-                top: auto !important;
-                width: auto !important;
-                height: auto !important;
-                margin-bottom: 10px;
-            }
         }
     </style>
 </head>
@@ -65,18 +57,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('container');
-            
-            // Add loading indicator
-            const loadingElement = document.createElement('div');
-            loadingElement.id = 'loading';
-            loadingElement.textContent = 'Loading images...';
-            container.appendChild(loadingElement);
-            
-            // Function to hide loading indicator
-            function hideLoading() {
-                const loader = document.getElementById('loading');
-                if (loader) loader.remove();
-            }
+            let isMobile = window.innerWidth <= 768;
             
             // Function to shuffle array
             function shuffleArray(array) {
@@ -140,7 +121,6 @@
                     let interval = setInterval(() => {
                         if (i >= imageEntries.length) {
                             clearInterval(interval);
-                            hideLoading();
                             return;
                         }
                         
@@ -154,7 +134,7 @@
                             let h_max = height - h;
                             
                             // Try multiple random positions
-                            for (let attempt = 0; attempt < 100; attempt++) {
+                            for (let attempt = 0; attempt < 50; attempt++) {
                                 let a_left = Math.random() * w_max;
                                 let a_top = Math.random() * h_max;
                                 
@@ -206,122 +186,74 @@
                         
                         container.appendChild(img);
                         i++;
-                        
-                        // If this is the last image, clear the interval
-                        if (i === imageEntries.length) {
-                            clearInterval(interval);
-                            hideLoading();
-                        }
                     }, 100);
                 })
                 .catch(error => {
                     console.error('Error loading images:', error);
-                    container.innerHTML = '<p>Error loading images.</p>';
-                    hideLoading();
                 });
 
-            // Mobile layout handler
+            // Define the handleMobileLayout function that was missing
             function handleMobileLayout() {
-                const isMobile = window.innerWidth <= 768;
+                // Skip if not on mobile
+                if (window.innerWidth > 768) return;
                 
-                if (isMobile) {
-                    // Get all images
-                    const images = document.querySelectorAll('#container img');
-                    if (images.length === 0) return; // No images loaded yet
+                const images = document.querySelectorAll('#container img');
+                if (images.length === 0) return;
+                
+                // Get container width
+                const containerWidth = container.clientWidth;
+                let currentY = 20;
+                
+                // Reposition each image for mobile
+                images.forEach(img => {
+                    // Get dimensions
+                    let width = parseInt(img.dataset.width);
+                    let height = parseInt(img.dataset.height);
                     
-                    // Get container width
-                    const containerWidth = container.clientWidth;
+                    // Scale down if too wide
+                    if (width > containerWidth * 0.8) {
+                        const scale = containerWidth * 0.8 / width;
+                        width = Math.floor(width * scale);
+                        height = Math.floor(height * scale);
+                        img.style.width = `${width}px`;
+                        img.style.height = `${height}px`;
+                    }
                     
-                    // Create a new positions array for mobile
-                    let mobilePositions = [];
+                    // Center horizontally
+                    const left = Math.max(0, (containerWidth - width) / 2);
                     
-                    // Maximum width for mobile is 70% of container
-                    const mobileMaxWidth = containerWidth * 0.7;
+                    // Position vertically
+                    img.style.position = "absolute";
+                    img.style.left = `${left}px`;
+                    img.style.top = `${currentY}px`;
                     
-                    // Reset container height
-                    let maxBottom = 0;
-                    
-                    // Reposition all images for mobile
-                    images.forEach((img) => {
-                        // Get current dimensions
-                        let width = parseInt(img.dataset.width || img.style.width);
-                        let height = parseInt(img.dataset.height || img.style.height);
-                        
-                        // Scale down if wider than mobile max width
-                        if (width > mobileMaxWidth) {
-                            const scale = mobileMaxWidth / width;
-                            width = Math.floor(width * scale);
-                            height = Math.floor(height * scale);
-                            
-                            img.style.width = `${width}px`;
-                            img.style.height = `${height}px`;
-                        }
-                        
-                        // Find a position using a more vertical-focused algorithm
-                        let found = false;
-                        let top = 0;
-                        let left = 0;
-                        
-                        // Try to place starting from the top, randomizing horizontal position
-                        while (!found) {
-                            // Randomize horizontal position but keep within container
-                            left = Math.floor(Math.random() * (containerWidth - width));
-                            
-                            // Check for overlaps
-                            let overlaps = false;
-                            for (const pos of mobilePositions) {
-                                if (
-                                    left < pos[0] + pos[2] &&
-                                    left + width > pos[0] &&
-                                    top < pos[1] + pos[3] &&
-                                    top + height > pos[1]
-                                ) {
-                                    overlaps = true;
-                                    break;
-                                }
-                            }
-                            
-                            if (!overlaps) {
-                                found = true;
-                            } else {
-                                // If overlap, try moving down by a small increment
-                                top += 20;
-                            }
-                        }
-                        
-                        // Update image position
-                        img.style.left = `${left}px`;
-                        img.style.top = `${top}px`;
-                        
-                        // Store the position [left, top, width, height]
-                        mobilePositions.push([left, top, width, height]);
-                        
-                        // Update max bottom
-                        const bottom = top + height;
-                        if (bottom > maxBottom) {
-                            maxBottom = bottom;
-                        }
-                    });
-                    
-                    // Update container height
-                    container.style.minHeight = `${maxBottom + 20}px`;
-                }
+                    // Update for next image
+                    currentY += height + 20;
+                });
+                
+                // Update container height
+                container.style.minHeight = `${currentY}px`;
             }
             
-            // Add window resize listener
-            window.addEventListener('resize', handleMobileLayout);
-        });
-
-        // Call mobile layout after images are loaded
-        window.addEventListener('load', () => {
-            // This timeout allows all images to be placed first
-            setTimeout(() => {
-                try {
-                    handleMobileLayout();
-                } catch (e) {
-                    console.error("Error in mobile layout:", e);
+            // Call mobile layout after images are loaded
+            window.addEventListener('load', () => {
+                setTimeout(handleMobileLayout, 500);
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                const wasMobile = isMobile;
+                isMobile = window.innerWidth <= 768;
+                
+                // Only reposition if switching between mobile and desktop
+                if (wasMobile !== isMobile) {
+                    if (isMobile) {
+                        handleMobileLayout();
+                    } else {
+                        location.reload(); // Simplest way to restore desktop layout
+                    }
                 }
-            }, 1000); // Increased timeout to 1000ms
+            });
         });
     </script>
 </body>
