@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vibe images</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        img {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+            object-fit: cover;
+        }
+        img:hover {
+            transform: scale(1.03);
+        }
+        #container {
+            position: relative;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        inspired by alexey guzey and sophia:
+        <a href="https://guzey.com/vibes/">https://guzey.com/vibes/</a>, 
+        <a href="https://girl.surgery/website_vibes/">https://girl.surgery/website_vibes/</a>
+    </h1>
+    <div id="container">
+        <!-- Images will be placed here by JavaScript -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('container');
+
+            // Shuffle array function
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Fetch the metadata
+            fetch('/image-metadata.json')
+                .then(response => response.json())
+                .then(data => {
+                    // Convert to array and shuffle
+                    let imageEntries = shuffleArray(Object.entries(data));
+                    const containerWidth = container.clientWidth;
+                    
+                    // Position the images
+                    const positions = [];
+                    
+                    imageEntries.forEach(([filename, [width, height]]) => {
+                        // Resize to reasonable dimensions
+                        const targetWidth = Math.min(width, containerWidth * 0.5);
+                        const targetHeight = height * (targetWidth / width);
+                        
+                        let foundPosition = false;
+                        let attempts = 0;
+                        let minTop = 0;
+                        
+                        // Try to find a non-overlapping position
+                        while (!foundPosition && attempts < 50) {
+                            const maxLeft = containerWidth - targetWidth;
+                            const left = Math.floor(Math.random() * maxLeft);
+                            const top = Math.floor(Math.random() * 500) + minTop;
+                            
+                            // Check for overlap
+                            let overlaps = false;
+                            for (const pos of positions) {
+                                if (
+                                    left < pos.left + pos.width &&
+                                    left + targetWidth > pos.left &&
+                                    top < pos.top + pos.height &&
+                                    top + targetHeight > pos.top
+                                ) {
+                                    overlaps = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!overlaps) {
+                                // No overlap, use this position
+                                positions.push({
+                                    left,
+                                    top,
+                                    width: targetWidth,
+                                    height: targetHeight
+                                });
+                                
+                                // Create and append the image
+                                const imgElement = document.createElement('img');
+                                imgElement.src = `/images/${filename}`;
+                                imgElement.style.position = 'absolute';
+                                imgElement.style.left = `${left}px`;
+                                imgElement.style.top = `${top}px`;
+                                imgElement.style.width = `${targetWidth}px`;
+                                imgElement.style.height = `${targetHeight}px`;
+                                imgElement.loading = 'lazy';
+                                
+                                container.appendChild(imgElement);
+                                foundPosition = true;
+                            }
+                            
+                            attempts++;
+                            
+                            if (attempts >= 50) {
+                                minTop += 100;
+                                attempts = 0;
+                            }
+                        }
+                    });
+                    
+                    // Set container height
+                    let maxBottom = 0;
+                    positions.forEach(pos => {
+                        const bottom = pos.top + pos.height;
+                        if (bottom > maxBottom) {
+                            maxBottom = bottom;
+                        }
+                    });
+                    
+                    container.style.minHeight = `${maxBottom + 100}px`;
+                })
+                .catch(error => {
+                    console.error('Error setting up the image collage:', error);
+                    container.innerHTML = '<p>Error loading images.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
