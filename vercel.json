@@ -1,0 +1,9 @@
+{
+    "version": 2,
+    "buildCommand": "node generate-metadata.js",
+    "outputDirectory": "public",
+    "routes": [
+      { "handle": "filesystem" },
+      { "src": "/(.*)", "dest": "/index.html" }
+    ]
+  }
