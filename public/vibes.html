@@ -56,7 +56,7 @@
 
     <script>
        document.addEventListener('DOMContentLoaded', () => {
-                const container = document.getElementById('container');
+            const container = document.getElementById('container');
             // Ensure container doesn't cause horizontal scrolling
             container.style.maxWidth = '100%';
             container.style.overflowX = 'hidden';
@@ -82,9 +82,8 @@
                     let imageEntries = Object.entries(data);
                     imageEntries = shuffleArray(imageEntries);
                     
-                    // Get container dimensions
-                                        // Use the accurately measured container width for all calculations
-                            const containerWidth = actualContainerWidth;
+                    // Get container dimensions - MEASURE THIS DIRECTLY
+                    const containerWidth = container.getBoundingClientRect().width;
                     
                     // This scaling approach uses the exact method from your reference code
                     const pairs = imageEntries.map(([filename, [w, h]]) => {
@@ -113,9 +112,6 @@
                     // Position the images
                     let positions = [];
                     let i = 0;
-                    
-                    // Calculate max width needed for desktop layout (for proper mobile scaling later)
-                    const maxDesktopWidth = 1600; // More realistic assumption than 1200px
                     
                     // Use an interval to place images one by one
                     let interval = setInterval(() => {
@@ -198,6 +194,13 @@
                             }
                         }
                         
+                        // HARD CONSTRAINT: Never exceed container width
+                        let left = positions[i][0];
+                        if (left + w > containerWidth) {
+                            left = Math.max(0, containerWidth - w - 10);
+                            positions[i][0] = left;
+                        }
+                        
                         // Create and position the image
                         let img = document.createElement("img");
                         img.src = `/images/${imageEntries[i][0]}`;
@@ -207,13 +210,13 @@
                         img.style.height = `${h}px`;
                         img.style.position = "absolute";
                         img.style.top = `${positions[i][1]}px`;
-                        img.style.left = `${positions[i][0]}px`;
+                        img.style.left = `${left}px`;
                         img.loading = "lazy";
                         
                         // Store original position for future reference
                         originalPositions.push({
                             id: i,
-                            left: positions[i][0],
+                            left: left, // Use the adjusted position
                             top: positions[i][1],
                             width: w,
                             height: h
@@ -237,8 +240,8 @@
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
-                // Get container width
-                const containerWidth = container.clientWidth;
+                // Get container width - always measure directly
+                const containerWidth = container.getBoundingClientRect().width;
                 
                 // Create array to track image positions
                 let positions = [];
@@ -285,8 +288,15 @@
                         
                         // Apply new position with padding
                         const paddingLeft = containerWidth * 0.05; // 5% padding from left
-                        p.element.style.left = `${paddingLeft + newRelativePosition}px`;
-                        p.left = paddingLeft + newRelativePosition;
+                        
+                        // Final safety check to prevent overflow
+                        let newLeft = paddingLeft + newRelativePosition;
+                        if (newLeft + p.width > containerWidth) {
+                            newLeft = containerWidth - p.width - 10;
+                        }
+                        
+                        p.element.style.left = `${newLeft}px`;
+                        p.left = newLeft;
                     });
                 }
                 
@@ -356,7 +366,7 @@
                 container.style.width = 'calc(100vw - 40px)'; // Account for 20px padding on each side
                 container.style.maxWidth = 'calc(100vw - 40px)';
                 
-                // Get ACCURATE container width using getBoundingClientRect
+                // Always measure container width directly
                 const containerWidth = container.getBoundingClientRect().width;
                 
                 // Apply mobile sizing to images
@@ -391,9 +401,6 @@
                     // Add some randomness within the column
                     left += Math.floor(Math.random() * (columnWidth * 0.2));
                     
-                    // Ensure it stays within column bounds
-                    left = Math.min(left, (column + 1) * columnWidth - width - padding);
-                    
                     // Final boundary check before applying position
                     if (left + width > containerWidth) {
                         left = containerWidth - width - 10;
@@ -401,9 +408,6 @@
                     
                     // Update position (only horizontal, vertical will be fixed later)
                     img.style.left = `${left}px`;
-                    
-                    // Debug log to check if any images exceed boundary
-                    // console.log(`Image ${index}: left=${left}, width=${width}, right edge=${left+width}, container=${containerWidth}`);
                 });
                 
                 // Fix overlaps and improve distribution
