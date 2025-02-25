@@ -266,51 +266,22 @@
                     maxBottom = Math.max(maxBottom, top + height);
                 });
                 
-                // First, improve horizontal distribution if images are clustered
-                const leftPositions = positions.map(p => p.left);
-                const rightPositions = positions.map(p => p.left + p.width);
+                // First, do a simple width check to prevent horizontal overflow
+                positions.forEach(p => {
+                    if (p.left + p.width > containerWidth) {
+                        p.element.style.left = `${containerWidth - p.width - 5}px`;
+                    }
+                });
                 
-                // Calculate occupied width percentage
-                const leftmostPosition = Math.min(...leftPositions);
-                const rightmostPosition = Math.max(...rightPositions);
-                const usedWidth = rightmostPosition - leftmostPosition;
-                const widthPercentage = usedWidth / containerWidth;
-                
-                // If images are using less than 80% of screen width, redistribute horizontally
-                if (widthPercentage < 0.8) {
-                    // Calculate scale factor to occupy more space
-                    const scaleFactor = 0.9 / widthPercentage; // Target 90% usage
-                    
-                    positions.forEach(p => {
-                        // Calculate new position relative to leftmost image
-                        const relativePosition = p.left - leftmostPosition;
-                        const newRelativePosition = relativePosition * scaleFactor;
-                        
-                        // Apply new position with padding
-                        const paddingLeft = containerWidth * 0.05; // 5% padding from left
-                        
-                        // Final safety check to prevent overflow
-                        let newLeft = paddingLeft + newRelativePosition;
-                        if (newLeft + p.width > containerWidth) {
-                            newLeft = containerWidth - p.width - 10;
-                        }
-                        
-                        p.element.style.left = `${newLeft}px`;
-                        p.left = newLeft;
-                    });
-                }
-                
-                // Then fix vertical overlaps
-                let changed = true;
+                // Only fix severe overlaps - allow small overlaps
                 let iterations = 0;
-                const maxIterations = 50;
+                const maxIterations = 1; // Just one pass to minimize movement
                 
-                // Keep adjusting overlapping images downward
-                while (changed && iterations < maxIterations) {
-                    changed = false;
+                // Very minimal overlap fixing - only for severe cases
+                while (iterations < maxIterations) {
                     iterations++;
                     
-                    // Check each pair of images for overlap
+                    // Check each pair of images for significant overlap (>50%)
                     for (let i = 0; i < positions.length; i++) {
                         for (let j = 0; j < positions.length; j++) {
                             if (i === j) continue;
@@ -318,19 +289,28 @@
                             const a = positions[i];
                             const b = positions[j];
                             
-                            // Check if they overlap
-                            if (a.left < b.left + b.width && 
-                                a.left + a.width > b.left && 
-                                a.top < b.top + b.height && 
-                                a.top + a.height > b.top) {
+                            // Calculate overlap percentage
+                            const overlapX = Math.min(a.left + a.width, b.left + b.width) - 
+                                            Math.max(a.left, b.left);
+                            const overlapY = Math.min(a.top + a.height, b.top + b.height) - 
+                                            Math.max(a.top, b.top);
+                            
+                            // Only fix if both dimensions have significant overlap
+                            if (overlapX > 0 && overlapY > 0) {
+                                const overlapArea = overlapX * overlapY;
+                                const aArea = a.width * a.height;
+                                const bArea = b.width * b.height;
+                                const smallerArea = Math.min(aArea, bArea);
                                 
-                                // Move the higher one down below the lower one
-                                if (a.top <= b.top) {
-                                    const newTop = b.top + b.height + 10;
-                                    a.element.style.top = `${newTop}px`;
-                                    a.top = newTop;
-                                    changed = true;
-                                    maxBottom = Math.max(maxBottom, newTop + a.height);
+                                // Only fix if overlap is more than 50% of the smaller image
+                                if (overlapArea > smallerArea * 0.2) {
+                                    // Move the higher one down below the lower one
+                                    if (a.top <= b.top) {
+                                        const newTop = b.top + b.height + 5;
+                                        a.element.style.top = `${newTop}px`;
+                                        a.top = newTop;
+                                        maxBottom = Math.max(maxBottom, newTop + a.height);
+                                    }
                                 }
                             }
                         }
