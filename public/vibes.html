@@ -52,11 +52,11 @@
     </style>
 </head>
 <body>
-    <h1>
+    <h2>
         inspired by alexey guzey and sophia:
         <a href="https://guzey.com/vibes/">https://guzey.com/vibes/</a>, 
         <a href="https://girl.surgery/website_vibes/">https://girl.surgery/website_vibes/</a>
-    </h1>
+    </h2>
     <div id="container">
         <!-- Images will be placed here by JavaScript -->
     </div>
@@ -97,27 +97,33 @@
                     const rect = container.getBoundingClientRect();
                     const containerWidth = rect.width;
                     
-                    // Calculate resized dimensions for each image
+                    // This scaling approach uses the exact method from your reference code
                     const pairs = imageEntries.map(([filename, [w, h]]) => {
+                        // Target size in pixels (600*400 = 240,000 pixels)
                         let goal_pixels = 600 * 400;
                         let actual_pixels = w * h;
+                        let ratio = actual_pixels / goal_pixels;
                         
-                        // Progressive scaling based on image size
-                        if (actual_pixels / goal_pixels > 16) {
-                            return [parseInt(w / 8), parseInt(h / 8)];
+                        // Apply progressive scaling tiers exactly as in reference code
+                        if (ratio > 16) {
+                            // Very large images - scale down to 1/8
+                            return [Math.floor(w/8), Math.floor(h/8)];
                         }
-                        if (actual_pixels / goal_pixels > 4) {
-                            return [parseInt(w / 4), parseInt(h / 4)];
+                        if (ratio > 4) {
+                            // Large images - scale down to 1/4
+                            return [Math.floor(w/4), Math.floor(h/4)];
                         }
-                        if (actual_pixels / goal_pixels > 2) {
-                            return [parseInt(w / 2), parseInt(h / 2)];
-                        } 
-                        if (actual_pixels / goal_pixels < 0.5) {
-                            return [parseInt(w * 2), parseInt(h * 2)];
+                        if (ratio > 2) {
+                            // Medium-large images - scale down to 1/2
+                            return [Math.floor(w/2), Math.floor(h/2)];
+                        }
+                        if (ratio < 0.5) {
+                            // Very small images - scale up to 2x
+                            return [Math.floor(w*2), Math.floor(h*2)];
                         }
                         
                         // Default case - keep original size
-                        return [parseInt(w), parseInt(h)];
+                        return [w, h];
                     });
                     
                     // Position the images
@@ -142,11 +148,15 @@
                             let h_max = height - h;
                             
                             // Try multiple random positions
-                            for (let attempt = 0; attempt < 50; attempt++) {
+                            for (let attempt = 0; attempt < 100; attempt++) { // More attempts (100 instead of 50)
                                 let a_left = Math.random() * w_max;
                                 let a_top = Math.random() * h_max;
-                                let a_right = a_left + w;
-                                let a_bottom = a_top + h;
+                                
+                                // Allow images to be closer together by reducing the effective size
+                                // This creates some slight overlap or closer packing
+                                let overlap_tolerance = 0; // Set to negative for overlapping, 0 for edge-to-edge
+                                let a_right = a_left + w + overlap_tolerance;
+                                let a_bottom = a_top + h + overlap_tolerance;
                                 
                                 let intersects = false;
                                 
@@ -171,7 +181,7 @@
                             
                             // If we couldn't find a place, increase the height and try again
                             if (!found_place) {
-                                height += 50;
+                                height += 30; // Smaller increment (30 instead of 50)
                             }
                         }
                         
