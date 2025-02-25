@@ -56,7 +56,10 @@
 
     <script>
        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('container');
+                const container = document.getElementById('container');
+            // Ensure container doesn't cause horizontal scrolling
+            container.style.maxWidth = '100%';
+            container.style.overflowX = 'hidden';
             let isMobile = window.innerWidth <= 768;
             
             // Store original desktop positions when first created
