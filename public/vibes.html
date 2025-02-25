@@ -187,7 +187,7 @@
                         img.dataset.width = pairs[i][0];
                         img.dataset.height = pairs[i][1];
                         
-                        // Store original position for future reference
+                    // Store original position for future reference
                         originalPositions.push({
                             id: i,
                             left: positions[i][0],
@@ -204,6 +204,25 @@
                                 const scale = maxWidth / pairs[i][0];
                                 img.style.width = `${Math.floor(pairs[i][0] * scale)}px`;
                                 img.style.height = `${Math.floor(pairs[i][1] * scale)}px`;
+                            }
+                            
+                            // Ensure we use the full width of the container on mobile
+                            // This helps prevent LHS bias
+                            let adjustedLeft = positions[i][0];
+                            // Redistribute position across the width more evenly
+                            if (containerWidth < 500) { // Narrow mobile screens
+                                // Spread the images more evenly across the container width
+                                // Map the original position to a wider range
+                                const originalPosPercentage = positions[i][0] / 1200; // Assuming desktop width ~1200px
+                                adjustedLeft = Math.floor(originalPosPercentage * (containerWidth - img.width));
+                                
+                                // Add a little randomness for visual interest
+                                adjustedLeft += Math.floor(Math.random() * 20) - 10;
+                                
+                                // Ensure it stays in bounds
+                                adjustedLeft = Math.max(0, Math.min(containerWidth - img.width, adjustedLeft));
+                                
+                                img.style.left = `${adjustedLeft}px`;
                             }
                         }
                         
@@ -324,11 +343,21 @@
                     img.style.width = `${width}px`;
                     img.style.height = `${height}px`;
                     
-                    // Keep horizontal position but ensure it's visible
+                    // Keep horizontal position but ensure it's visible and well-distributed
                     let left = original.left;
-                    if (left + width > containerWidth) {
-                        left = Math.max(0, containerWidth - width - 10);
+                    
+                    // For narrow mobile screens like iPhone, redistribute positions better
+                    if (containerWidth < 500) {
+                        // Map original desktop position to mobile viewport width
+                        const originalPosPercentage = original.left / 1200; // Assuming desktop width ~1200px
+                        left = Math.floor(originalPosPercentage * (containerWidth - width));
+                        
+                        // Add slight random variation
+                        left += Math.floor(Math.random() * 20) - 10;
                     }
+                    
+                    // Ensure it's within bounds
+                    left = Math.max(0, Math.min(containerWidth - width, left));
                     
                     // Update position (keep horizontal position, vertical will be fixed later)
                     img.style.left = `${left}px`;
