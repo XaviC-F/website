@@ -228,16 +228,27 @@
                         img.style.top = `${positions[i][1]}px`;
                         img.style.left = `${left}px`;
                         img.loading = "lazy";
-                        
+
                         // Store original position for future reference
                         originalPositions.push({
                             id: i,
-                            left: left, // Use the adjusted position
+                            left: left,
                             top: positions[i][1],
                             width: w,
                             height: h
                         });
-                        
+
+                        // Calculate current bottom position of this image
+                        const currentBottom = positions[i][1] + h;
+
+                        // Update container height immediately if this image extends beyond current height
+                        // This ensures the container grows in real-time as images are added
+                        const currentContainerHeight = parseInt(container.style.height) || container.offsetHeight;
+                        if (currentBottom + 50 > currentContainerHeight) {
+                            container.style.height = `${currentBottom + 50}px`;
+                            container.style.minHeight = `${currentBottom + 50}px`;
+                        }
+
                         container.appendChild(img);
                         i++;
                         
