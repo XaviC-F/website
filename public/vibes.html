@@ -117,6 +117,22 @@
                     let interval = setInterval(() => {
                         if (i >= imageEntries.length) {
                             clearInterval(interval);
+                            
+                            // Calculate the maximum bottom position of all images
+                            let maxBottom = 0;
+                            document.querySelectorAll('#container img').forEach(img => {
+                                const bottom = parseInt(img.style.top) + parseInt(img.style.height);
+                                maxBottom = Math.max(maxBottom, bottom);
+                            });
+                            
+                            // Update container height to fit all images plus padding
+                            container.style.height = `${maxBottom + 50}px`;
+                            container.style.minHeight = `${maxBottom + 50}px`;
+                            
+                            // Only call fixMobileLayout if in mobile mode
+                            if (isMobile) {
+                                setTimeout(fixMobileLayout, 100);
+                            }
                             return;
                         }
                         
