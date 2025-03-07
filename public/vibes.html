@@ -395,11 +395,22 @@
                     
                     // Make images bigger for mobile (40-55% of container width max)
                     const maxWidth = containerWidth * (0.4 + Math.random() * 0.15);
+                    // Add max height limit - 30% of viewport height
+                    const maxHeight = window.innerHeight * 0.30;
+                    
                     let width = original.width;
                     let height = original.height;
                     
-                    if (width > maxWidth) {
-                        const scale = maxWidth / width;
+                    // Check if image exceeds either limit
+                    if (width > maxWidth || height > maxHeight) {
+                        // Calculate scale factors for both dimensions
+                        const widthScale = maxWidth / width;
+                        const heightScale = maxHeight / height;
+                        
+                        // Use the more restrictive scale (smaller value)
+                        const scale = Math.min(widthScale, heightScale);
+                        
+                        // Apply the scaling
                         width = Math.floor(width * scale);
                         height = Math.floor(height * scale);
                     }
