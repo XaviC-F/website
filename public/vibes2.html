@@ -290,7 +290,7 @@
                                 const overlapArea = overlapX * overlapY;
                                 const smallerArea = Math.min(a.width * a.height, b.width * b.height);
                                 
-                                if (overlapArea > smallerArea * 0.1) {
+                                if (overlapArea > smallerArea * 0.3) {
                                     if (a.top <= b.top) {
                                         const newTop = b.top + b.height + 5;
                                         a.element.style.top = `${newTop}px`;
