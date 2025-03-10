@@ -94,9 +94,9 @@
                     
                     return [w, h];
                 } else {
-                    // Mobile scaling with constraints
-                    const maxWidth = containerWidth * 0.7;
-                    const maxHeight = window.innerHeight * 0.5;
+                    // Mobile scaling with constraints - making images smaller
+                    const maxWidth = containerWidth * 0.5; // Reduced from 0.7
+                    const maxHeight = window.innerHeight * 0.35; // Reduced from 0.5
                     
                     if (w > maxWidth || h > maxHeight) {
                         const widthScale = maxWidth / w;
@@ -139,6 +139,7 @@
                 
                 const containerWidth = config.containerEl.getBoundingClientRect().width;
                 
+                // First pass: resize all images
                 images.forEach((img, index) => {
                     if (index >= originalPositions.length) return;
                     
@@ -148,21 +149,51 @@
                     // Update size
                     img.style.width = `${width}px`;
                     img.style.height = `${height}px`;
-                    
-                    // Column-based positioning for mobile
-                    const column = index % 3;
-                    const columnWidth = containerWidth / 3;
-                    const padding = Math.floor(columnWidth * 0.1);
-                    let left = (column * columnWidth) + padding;
-                    
-                    // Boundary check
-                    left = Math.min(left, containerWidth - width - 10);
-                    
-                    // Update position
-                    img.style.left = `${left}px`;
                 });
                 
-                setTimeout(fixMobileLayout, 100);
+                // Second pass: randomize positions more naturally
+                const positions = [];
+                let currentHeight = 50; // Start with some padding
+                
+                // Collect and sort images by original vertical position
+                const imgData = Array.from(images).map((img, index) => {
+                    if (index >= originalPositions.length) return null;
+                    return {
+                        element: img,
+                        origTop: originalPositions[index].top,
+                        width: parseInt(img.style.width),
+                        height: parseInt(img.style.height)
+                    };
+                }).filter(item => item !== null)
+                  .sort((a, b) => a.origTop - b.origTop);
+                
+                // Apply randomized positioning
+                imgData.forEach(item => {
+                    // Random horizontal position within container bounds
+                    const maxLeft = containerWidth - item.width - 10;
+                    const left = Math.floor(Math.random() * maxLeft);
+                    
+                    // Use current height plus some random spacing
+                    const spacing = Math.floor(Math.random() * 40) + 10; // 10-50px spacing
+                    const top = currentHeight + spacing;
+                    
+                    // Update position
+                    item.element.style.left = `${left}px`;
+                    item.element.style.top = `${top}px`;
+                    
+                    // Update current height for next image
+                    currentHeight = top + item.height;
+                    
+                    // Store position for overlap detection
+                    positions.push([left, top, item.width, item.height, item.element]);
+                });
+                
+                // Set container height
+                config.containerEl.style.height = `${currentHeight + 50}px`;
+                config.containerEl.style.minHeight = `${currentHeight + 50}px`;
+                
+                // Run overlap fix with more iterations for random layout
+                setTimeout(() => fixMobileLayout(true), 100);
             }
             
             function restoreDesktopLayout() {
@@ -177,7 +208,7 @@
                 });
             }
             
-            function fixMobileLayout() {
+            function fixMobileLayout(isRandom = false) {
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
@@ -207,33 +238,73 @@
                     }
                 });
                 
-                // Fix severe overlaps
-                for (let i = 0; i < positions.length; i++) {
-                    for (let j = 0; j < positions.length; j++) {
-                        if (i === j) continue;
-                        
-                        const a = positions[i];
-                        const b = positions[j];
-                        
-                        const overlapX = Math.min(a.left + a.width, b.left + b.width) - 
-                                        Math.max(a.left, b.left);
-                        const overlapY = Math.min(a.top + a.height, b.top + b.height) - 
-                                        Math.max(a.top, b.top);
-                        
-                        if (overlapX > 0 && overlapY > 0) {
-                            const overlapArea = overlapX * overlapY;
-                            const smallerArea = Math.min(a.width * a.height, b.width * b.height);
+                // Set overlap threshold - more permissive for random layout
+                const overlapThreshold = isRandom ? 0.4 : 0.3;
+                const maxIterations = isRandom ? 3 : 1; // Multiple passes for random layout
+                
+                // Fix severe overlaps with multiple iterations if random layout
+                for (let iteration = 0; iteration < maxIterations; iteration++) {
+                    let madeChanges = false;
+                    
+                    for (let i = 0; i < positions.length; i++) {
+                        for (let j = 0; j < positions.length; j++) {
+                            if (i === j) continue;
                             
-                            if (overlapArea > smallerArea * 0.3) {
-                                if (a.top <= b.top) {
-                                    const newTop = b.top + b.height + 5;
-                                    a.element.style.top = `${newTop}px`;
-                                    a.top = newTop;
-                                    maxBottom = Math.max(maxBottom, newTop + a.height);
+                            const a = positions[i];
+                            const b = positions[j];
+                            
+                            const overlapX = Math.min(a.left + a.width, b.left + b.width) - 
+                                            Math.max(a.left, b.left);
+                            const overlapY = Math.min(a.top + a.height, b.top + b.height) - 
+                                            Math.max(a.top, b.top);
+                            
+                            if (overlapX > 0 && overlapY > 0) {
+                                const overlapArea = overlapX * overlapY;
+                                const smallerArea = Math.min(a.width * a.height, b.width * b.height);
+                                
+                                if (overlapArea > smallerArea * overlapThreshold) {
+                                    // For random layouts, also try horizontal adjustments
+                                    if (isRandom && Math.random() > 0.5 && 
+                                        overlapX < overlapY && a.left + a.width > b.left) {
+                                        // Try horizontal adjustment
+                                        const newLeft = b.left - a.width - 5;
+                                        if (newLeft >= 0) {
+                                            a.element.style.left = `${newLeft}px`;
+                                            a.left = newLeft;
+                                            madeChanges = true;
+                                            continue;
+                                        }
+                                    }
+                                    
+                                    // Default vertical adjustment
+                                    if (a.top <= b.top) {
+                                        const newTop = b.top + b.height + 5;
+                                        a.element.style.top = `${newTop}px`;
+                                        a.top = newTop;
+                                        maxBottom = Math.max(maxBottom, newTop + a.height);
+                                        madeChanges = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    
+                    // If no changes were made, no need for more iterations
+                    if (!madeChanges) break;
+                }
+                
+                // Add some random horizontal jitter for more natural feel in random layout
+                if (isRandom) {
+                    positions.forEach(p => {
+                        // Add small random horizontal adjustments (±10px)
+                        const jitter = Math.floor(Math.random() * 20) - 10;
+                        let newLeft = p.left + jitter;
+                        
+                        // Keep within bounds
+                        newLeft = Math.max(0, Math.min(containerWidth - p.width, newLeft));
+                        
+                        p.element.style.left = `${newLeft}px`;
+                    });
                 }
                 
                 config.containerEl.style.minHeight = `${maxBottom + 30}px`;
