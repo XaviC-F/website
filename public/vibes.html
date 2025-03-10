@@ -15,11 +15,11 @@
             margin-top: 0px;
             margin-bottom: 30px;
             text-align: left;
-            font-size: 24px; /* Desktop size */
+            font-size: 24px;
         }
         img {
             border: 1px solid #ddd;
-            border-radius: 1px;
+            border-radius: 2px;
             transition: transform 0.2s ease;
             object-fit: cover;
         }
@@ -27,19 +27,17 @@
             position: relative;
             min-height: 100vh;
         }
-        /* Add this for mobile support */
+        /* Mobile support */
         @media (max-width: 768px) {
             body {
-                padding: 10px; /* Less padding on mobile */
+                padding: 10px;
             }
-            
             h1 {
-                font-size: 20px; /* Smaller heading on mobile */
-                margin-bottom: 30px; /* Less margin on mobile */
+                font-size: 20px;
+                margin-bottom: 30px;
             }
-            
             p, div {
-                font-size: 14px; /* Smaller text on mobile */
+                font-size: 14px;
             }
         }
     </style>
@@ -55,17 +53,23 @@
     </div>
 
     <script>
-       document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('container');
-            // Ensure container doesn't cause horizontal scrolling
-            container.style.maxWidth = '100%';
-            container.style.overflowX = 'hidden';
-            let isMobile = window.innerWidth <= 768;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuration
+            const config = {
+                isMobile: window.innerWidth <= 768,
+                targetPixels: 600 * 400,
+                containerEl: document.getElementById('container'),
+                imageLoadDelay: 50
+            };
             
-            // Store original desktop positions when first created
-            let originalPositions = [];
+            // Initialize container
+            config.containerEl.style.maxWidth = '100%';
+            config.containerEl.style.overflowX = 'hidden';
             
-            // Function to shuffle array
+            // Store original positions for responsive layout
+            const originalPositions = [];
+            
+            // Helper functions
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -74,303 +78,56 @@
                 return array;
             }
             
-            // Fetch the metadata
-            fetch('/image-metadata.json')
-                .then(response => response.json())
-                .then(data => {
-                    // Convert object to array of [filename, [width, height]] entries
-                    let imageEntries = Object.entries(data);
-                    imageEntries = shuffleArray(imageEntries);
-                    
-                    // Get container dimensions - MEASURE THIS DIRECTLY
-                    const containerWidth = container.getBoundingClientRect().width;
-                    
-                    // This scaling approach uses the exact method from your reference code
-                    const pairs = imageEntries.map(([filename, [w, h]]) => {
-                        // Target size in pixels (600*400 = 240,000 pixels)
-                        let goal_pixels = 600 * 400;
-                        let actual_pixels = w * h;
-                        let ratio = actual_pixels / goal_pixels;
-                        
-                        // Apply progressive scaling tiers exactly as in reference code
-                        if (ratio > 16) {
-                            return [Math.floor(w/8), Math.floor(h/8)];
-                        }
-                        if (ratio > 4) {
-                            return [Math.floor(w/4), Math.floor(h/4)];
-                        }
-                        if (ratio > 2) {
-                            return [Math.floor(w/2), Math.floor(h/2)];
-                        }
-                        if (ratio < 0.5) {
-                            return [Math.floor(w*2), Math.floor(h*2)];
-                        }
-                        
-                        return [w, h];
-                    });
-                    
-                    // Position the images
-                    let positions = [];
-                    let i = 0;
-                    
-                    // Use an interval to place images one by one
-                    let interval = setInterval(() => {
-                        if (i >= imageEntries.length) {
-                            clearInterval(interval);
-                            
-                            // Calculate the maximum bottom position of all images
-                            let maxBottom = 0;
-                            document.querySelectorAll('#container img').forEach(img => {
-                                const bottom = parseInt(img.style.top) + parseInt(img.style.height);
-                                maxBottom = Math.max(maxBottom, bottom);
-                            });
-                            
-                            // Update container height to fit all images plus padding
-                            container.style.height = `${maxBottom + 50}px`;
-                            container.style.minHeight = `${maxBottom + 50}px`;
-                            
-                            // Only call fixMobileLayout if in mobile mode
-                            if (isMobile) {
-                                setTimeout(fixMobileLayout, 100);
-                            }
-                            return;
-                        }
-                        
-                        let height = 600;
-                        let [w, h] = pairs[i];
-                        
-                        // Apply mobile scaling immediately if needed
-                        if (isMobile) {
-                            // Consistent scaling for mobile - images take up 50-80% of screen width max
-                            const maxMobileWidth = containerWidth * (0.5 + Math.random() * 0.30);
-                            // Add max height limit - images take up 50-80% of screen height max
-                            const maxMobileHeight = window.innerHeight * (0.5 + Math.random() * 0.30);
-                            
-                            // Check if image exceeds either limit
-                            if (w > maxMobileWidth || h > maxMobileHeight) {
-                                // Calculate scale factors for both dimensions
-                                const widthScale = maxMobileWidth / w;
-                                const heightScale = maxMobileHeight / h;
-                                
-                                // Use the more restrictive scale (smaller value)
-                                const scale = Math.min(widthScale, heightScale);
-                                
-                                // Apply the scaling
-                                w = Math.floor(w * scale);
-                                h = Math.floor(h * scale);
-                            }
-                        }
-                        
-                        let found_place = false;
-                        
-                        // Find a position that doesn't overlap with existing images
-                        while (!found_place) {
-                            let w_max = containerWidth - w;
-                            let h_max = height - h;
-                            
-                            // Try multiple random positions
-                            for (let attempt = 0; attempt < 50; attempt++) {
-                                // For mobile, use a distribution strategy that better utilizes screen width
-                                let a_left;
-                                if (isMobile) {
-                                    // Divide screen into 3 columns and place in one of them
-                                    const column = Math.floor(Math.random() * 3); // 0, 1, or 2
-                                    const columnWidth = containerWidth / 3;
-                                    // Calculate position within column with padding
-                                    const padding = Math.floor(columnWidth * 0.1);
-                                    const availableWidth = columnWidth - padding * 2;
-                                    // Ensure image fits in column
-                                    const maxPositionInColumn = Math.max(0, columnWidth - w - padding);
-                                    // Random position within column
-                                    a_left = (column * columnWidth) + padding + 
-                                            (Math.random() * Math.min(availableWidth, maxPositionInColumn));
-                                } else {
-                                    // Desktop - use full random placement
-                                    a_left = Math.random() * w_max;
-                                }
-                                
-                                let a_top = Math.random() * h_max;
-                                
-                                let a_right = a_left + w;
-                                let a_bottom = a_top + h;
-                                
-                                let intersects = false;
-                                
-                                // Check for intersection with existing images
-                                for (let j = 0; j < positions.length; j++) {
-                                    let [b_left, b_top, b_width, b_height] = positions[j];
-                                    let b_right = b_left + b_width;
-                                    let b_bottom = b_top + b_height;
-                                    
-                                    if (a_left < b_right && a_right > b_left && a_bottom > b_top && a_top < b_bottom) {
-                                        intersects = true;
-                                        break;
-                                    }
-                                }
-                                
-                                if (!intersects) {
-                                    found_place = true;
-                                    positions.push([parseInt(a_left), parseInt(a_top), w, h]);
-                                    break;
-                                }
-                            }
-                            
-                            // If we couldn't find a place, increase the height and try again
-                            if (!found_place) {
-                                height += 30;
-                            }
-                        }
-                        
-                        // HARD CONSTRAINT: Never exceed container width
-                        let left = positions[i][0];
-                        if (left + w > containerWidth) {
-                            left = Math.max(0, containerWidth - w - 10);
-                            positions[i][0] = left;
-                        }
-                        
-                        // Create and position the image
-                        let img = document.createElement("img");
-                        img.src = `/images/${imageEntries[i][0]}`;
-                        img.width = w;
-                        img.height = h;
-                        img.style.width = `${w}px`;
-                        img.style.height = `${h}px`;
-                        img.style.position = "absolute";
-                        img.style.top = `${positions[i][1]}px`;
-                        img.style.left = `${left}px`;
-                        img.loading = "lazy";
-
-                        // Store original position for future reference
-                        originalPositions.push({
-                            id: i,
-                            left: left,
-                            top: positions[i][1],
-                            width: w,
-                            height: h
-                        });
-
-                        // Calculate current bottom position of this image
-                        const currentBottom = positions[i][1] + h;
-
-                        // Update container height immediately if this image extends beyond current height
-                        // This ensures the container grows in real-time as images are added
-                        const currentContainerHeight = parseInt(container.style.height) || container.offsetHeight;
-                        if (currentBottom + 50 > currentContainerHeight) {
-                            container.style.height = `${currentBottom + 50}px`;
-                            container.style.minHeight = `${currentBottom + 50}px`;
-                        }
-
-                        container.appendChild(img);
-                        i++;
-                        
-                        // If this is the last image and we're on mobile, fix overlaps
-                        if (i === imageEntries.length && isMobile) {
-                            setTimeout(fixMobileLayout, 100);
-                        }
-                    }, 50); // Faster interval for better UX
-                })
-                .catch(error => {
-                    console.error('Error loading images:', error);
-                });
-
-            // Function to fix both vertical overlaps and improve horizontal distribution
-            function fixMobileLayout() {
-                const images = document.querySelectorAll('#container img');
-                if (images.length === 0) return;
+            function scaleImage(w, h, isMobile) {
+                // Get container width
+                const containerWidth = config.containerEl.getBoundingClientRect().width;
                 
-                // Get container width - always measure directly
-                const containerWidth = container.getBoundingClientRect().width;
-                
-                // Create array to track image positions
-                let positions = [];
-                let maxBottom = 0;
-                
-                // Collect current positions
-                images.forEach((img, index) => {
-                    const left = parseInt(img.style.left);
-                    const top = parseInt(img.style.top);
-                    const width = parseInt(img.style.width);
-                    const height = parseInt(img.style.height);
+                if (!isMobile) {
+                    // Desktop scaling based on target pixels
+                    let actual_pixels = w * h;
+                    let ratio = actual_pixels / config.targetPixels;
                     
-                    positions.push({ 
-                        index, 
-                        left, 
-                        top, 
-                        width, 
-                        height, 
-                        element: img 
-                    });
+                    if (ratio > 16) return [Math.floor(w/8), Math.floor(h/8)];
+                    if (ratio > 4) return [Math.floor(w/4), Math.floor(h/4)];
+                    if (ratio > 2) return [Math.floor(w/2), Math.floor(h/2)];
+                    if (ratio < 0.5) return [Math.floor(w*2), Math.floor(h*2)];
                     
-                    maxBottom = Math.max(maxBottom, top + height);
-                });
-                
-                // First, do a simple width check to prevent horizontal overflow
-                positions.forEach(p => {
-                    if (p.left + p.width > containerWidth) {
-                        p.element.style.left = `${containerWidth - p.width - 5}px`;
+                    return [w, h];
+                } else {
+                    // Mobile scaling with constraints - making images smaller
+                    const maxWidth = containerWidth * 0.5; // Reduced from 0.7
+                    const maxHeight = window.innerHeight * 0.35; // Reduced from 0.5
+                    
+                    if (w > maxWidth || h > maxHeight) {
+                        const widthScale = maxWidth / w;
+                        const heightScale = maxHeight / h;
+                        const scale = Math.min(widthScale, heightScale);
+                        return [Math.floor(w * scale), Math.floor(h * scale)];
                     }
-                });
-                
-                // Only fix severe overlaps - allow small overlaps
-                let iterations = 0;
-                const maxIterations = 1; // Just one pass to minimize movement
-                
-                // Very minimal overlap fixing - only for severe cases
-                while (iterations < maxIterations) {
-                    iterations++;
-                    
-                    // Check each pair of images for significant overlap (>50%)
-                    for (let i = 0; i < positions.length; i++) {
-                        for (let j = 0; j < positions.length; j++) {
-                            if (i === j) continue;
-                            
-                            const a = positions[i];
-                            const b = positions[j];
-                            
-                            // Calculate overlap percentage
-                            const overlapX = Math.min(a.left + a.width, b.left + b.width) - 
-                                            Math.max(a.left, b.left);
-                            const overlapY = Math.min(a.top + a.height, b.top + b.height) - 
-                                            Math.max(a.top, b.top);
-                            
-                            // Only fix if both dimensions have significant overlap
-                            if (overlapX > 0 && overlapY > 0) {
-                                const overlapArea = overlapX * overlapY;
-                                const aArea = a.width * a.height;
-                                const bArea = b.width * b.height;
-                                const smallerArea = Math.min(aArea, bArea);
-                                
-                                // Only fix if overlap is more than 50% of the smaller image
-                                if (overlapArea > smallerArea * 0.1) {
-                                    // Move the higher one down below the lower one
-                                    if (a.top <= b.top) {
-                                        const newTop = b.top + b.height + 5;
-                                        a.element.style.top = `${newTop}px`;
-                                        a.top = newTop;
-                                        maxBottom = Math.max(maxBottom, newTop + a.height);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    return [w, h];
                 }
-                
-                // Update container height
-                container.style.minHeight = `${maxBottom + 30}px`;
             }
             
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                const wasMobile = isMobile;
-                isMobile = window.innerWidth <= 768;
+            function updateContainerHeight() {
+                let maxBottom = 0;
+                document.querySelectorAll('#container img').forEach(img => {
+                    const bottom = parseInt(img.style.top) + parseInt(img.style.height);
+                    maxBottom = Math.max(maxBottom, bottom);
+                });
                 
-                // Only reposition if switching between mobile and desktop
-                if (wasMobile !== isMobile) {
-                    if (isMobile) {
-                        // Apply mobile layout
+                config.containerEl.style.height = `${maxBottom + 50}px`;
+                config.containerEl.style.minHeight = `${maxBottom + 50}px`;
+            }
+            
+            // Handle window resize for responsive layout
+            window.addEventListener('resize', () => {
+                const wasMobile = config.isMobile;
+                config.isMobile = window.innerWidth <= 768;
+                
+                if (wasMobile !== config.isMobile) {
+                    if (config.isMobile) {
                         applyMobileLayout();
                     } else {
-                        // Restore desktop layout
                         restoreDesktopLayout();
                     }
                 }
@@ -380,72 +137,67 @@
                 const images = document.querySelectorAll('#container img');
                 if (images.length === 0) return;
                 
-                // Force container to match window width exactly
-                container.style.width = 'calc(100vw - 40px)'; // Account for 20px padding on each side
-                container.style.maxWidth = 'calc(100vw - 40px)';
+                const containerWidth = config.containerEl.getBoundingClientRect().width;
                 
-                // Always measure container width directly
-                const containerWidth = container.getBoundingClientRect().width;
-                
-                // Apply mobile sizing to images
+                // First pass: resize all images
                 images.forEach((img, index) => {
                     if (index >= originalPositions.length) return;
                     
                     const original = originalPositions[index];
-                    
-                    // Make images bigger for mobile (40-55% of container width max)
-                    const maxWidth = containerWidth * (0.4 + Math.random() * 0.15);
-                    // Add max height limit - 30% of viewport height
-                    const maxHeight = window.innerHeight * 0.30;
-                    
-                    let width = original.width;
-                    let height = original.height;
-                    
-                    // Check if image exceeds either limit
-                    if (width > maxWidth || height > maxHeight) {
-                        // Calculate scale factors for both dimensions
-                        const widthScale = maxWidth / width;
-                        const heightScale = maxHeight / height;
-                        
-                        // Use the more restrictive scale (smaller value)
-                        const scale = Math.min(widthScale, heightScale);
-                        
-                        // Apply the scaling
-                        width = Math.floor(width * scale);
-                        height = Math.floor(height * scale);
-                    }
+                    const [width, height] = scaleImage(original.width, original.height, true);
                     
                     // Update size
                     img.style.width = `${width}px`;
                     img.style.height = `${height}px`;
-                    
-                    // For horizontal positioning, use column-based approach
-                    const column = index % 3; // 0, 1, or 2
-                    const columnWidth = containerWidth / 3;
-                    const padding = Math.floor(columnWidth * 0.1);
-                    
-                    // Calculate position within column with padding
-                    let left = (column * columnWidth) + padding;
-                    
-                    // Add some randomness within the column
-                    left += Math.floor(Math.random() * (columnWidth * 0.2));
-                    
-                    // Final boundary check before applying position
-                    if (left + width > containerWidth) {
-                        left = containerWidth - width - 10;
-                    }
-                    
-                    // Update position (only horizontal, vertical will be fixed later)
-                    img.style.left = `${left}px`;
                 });
                 
-                // Fix overlaps and improve distribution
-                setTimeout(fixMobileLayout, 100);
+                // Second pass: randomize positions more naturally
+                const positions = [];
+                let currentHeight = 50; // Start with some padding
+                
+                // Collect and sort images by original vertical position
+                const imgData = Array.from(images).map((img, index) => {
+                    if (index >= originalPositions.length) return null;
+                    return {
+                        element: img,
+                        origTop: originalPositions[index].top,
+                        width: parseInt(img.style.width),
+                        height: parseInt(img.style.height)
+                    };
+                }).filter(item => item !== null)
+                  .sort((a, b) => a.origTop - b.origTop);
+                
+                // Apply randomized positioning
+                imgData.forEach(item => {
+                    // Random horizontal position within container bounds
+                    const maxLeft = containerWidth - item.width - 10;
+                    const left = Math.floor(Math.random() * maxLeft);
+                    
+                    // Use current height plus some random spacing
+                    const spacing = Math.floor(Math.random() * 40) + 10; // 10-50px spacing
+                    const top = currentHeight + spacing;
+                    
+                    // Update position
+                    item.element.style.left = `${left}px`;
+                    item.element.style.top = `${top}px`;
+                    
+                    // Update current height for next image
+                    currentHeight = top + item.height;
+                    
+                    // Store position for overlap detection
+                    positions.push([left, top, item.width, item.height, item.element]);
+                });
+                
+                // Set container height
+                config.containerEl.style.height = `${currentHeight + 50}px`;
+                config.containerEl.style.minHeight = `${currentHeight + 50}px`;
+                
+                // Run overlap fix with more iterations for random layout
+                setTimeout(() => fixMobileLayout(true), 100);
             }
             
             function restoreDesktopLayout() {
-                const images = document.querySelectorAll('#container img');
-                images.forEach((img, index) => {
+                document.querySelectorAll('#container img').forEach((img, index) => {
                     if (index < originalPositions.length) {
                         const original = originalPositions[index];
                         img.style.width = `${original.width}px`;
@@ -455,6 +207,227 @@
                     }
                 });
             }
+            
+            function fixMobileLayout(isRandom = false) {
+                const images = document.querySelectorAll('#container img');
+                if (images.length === 0) return;
+                
+                const containerWidth = config.containerEl.getBoundingClientRect().width;
+                const positions = [];
+                let maxBottom = 0;
+                
+                // Collect current positions
+                images.forEach((img, index) => {
+                    positions.push({
+                        index,
+                        left: parseInt(img.style.left),
+                        top: parseInt(img.style.top),
+                        width: parseInt(img.style.width),
+                        height: parseInt(img.style.height),
+                        element: img
+                    });
+                    
+                    const bottom = parseInt(img.style.top) + parseInt(img.style.height);
+                    maxBottom = Math.max(maxBottom, bottom);
+                });
+                
+                // Fix horizontal overflow
+                positions.forEach(p => {
+                    if (p.left + p.width > containerWidth) {
+                        p.element.style.left = `${containerWidth - p.width - 5}px`;
+                    }
+                });
+                
+                // Set overlap threshold - more permissive for random layout
+                const overlapThreshold = isRandom ? 0.4 : 0.3;
+                const maxIterations = isRandom ? 3 : 1; // Multiple passes for random layout
+                
+                // Fix severe overlaps with multiple iterations if random layout
+                for (let iteration = 0; iteration < maxIterations; iteration++) {
+                    let madeChanges = false;
+                    
+                    for (let i = 0; i < positions.length; i++) {
+                        for (let j = 0; j < positions.length; j++) {
+                            if (i === j) continue;
+                            
+                            const a = positions[i];
+                            const b = positions[j];
+                            
+                            const overlapX = Math.min(a.left + a.width, b.left + b.width) - 
+                                            Math.max(a.left, b.left);
+                            const overlapY = Math.min(a.top + a.height, b.top + b.height) - 
+                                            Math.max(a.top, b.top);
+                            
+                            if (overlapX > 0 && overlapY > 0) {
+                                const overlapArea = overlapX * overlapY;
+                                const smallerArea = Math.min(a.width * a.height, b.width * b.height);
+                                
+                                if (overlapArea > smallerArea * overlapThreshold) {
+                                    // For random layouts, also try horizontal adjustments
+                                    if (isRandom && Math.random() > 0.5 && 
+                                        overlapX < overlapY && a.left + a.width > b.left) {
+                                        // Try horizontal adjustment
+                                        const newLeft = b.left - a.width - 5;
+                                        if (newLeft >= 0) {
+                                            a.element.style.left = `${newLeft}px`;
+                                            a.left = newLeft;
+                                            madeChanges = true;
+                                            continue;
+                                        }
+                                    }
+                                    
+                                    // Default vertical adjustment
+                                    if (a.top <= b.top) {
+                                        const newTop = b.top + b.height + 5;
+                                        a.element.style.top = `${newTop}px`;
+                                        a.top = newTop;
+                                        maxBottom = Math.max(maxBottom, newTop + a.height);
+                                        madeChanges = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If no changes were made, no need for more iterations
+                    if (!madeChanges) break;
+                }
+                
+                // Add some random horizontal jitter for more natural feel in random layout
+                if (isRandom) {
+                    positions.forEach(p => {
+                        // Add small random horizontal adjustments (±10px)
+                        const jitter = Math.floor(Math.random() * 20) - 10;
+                        let newLeft = p.left + jitter;
+                        
+                        // Keep within bounds
+                        newLeft = Math.max(0, Math.min(containerWidth - p.width, newLeft));
+                        
+                        p.element.style.left = `${newLeft}px`;
+                    });
+                }
+                
+                config.containerEl.style.minHeight = `${maxBottom + 30}px`;
+            }
+            
+            // Fetch and display images
+            fetch('/image-metadata.json')
+                .then(response => response.json())
+                .then(data => {
+                    // Convert to array and shuffle
+                    let imageEntries = shuffleArray(Object.entries(data));
+                    
+                    // Position images
+                    const positions = [];
+                    let i = 0;
+                    
+                    const interval = setInterval(() => {
+                        if (i >= imageEntries.length) {
+                            clearInterval(interval);
+                            updateContainerHeight();
+                            
+                            if (config.isMobile) {
+                                setTimeout(fixMobileLayout, 100);
+                            }
+                            return;
+                        }
+                        
+                        const [filename, [w, h]] = imageEntries[i];
+                        const [width, height] = scaleImage(w, h, config.isMobile);
+                        
+                        // Find position
+                        let found = false;
+                        let position;
+                        let height_limit = 600;
+                        
+                        const containerWidth = config.containerEl.getBoundingClientRect().width;
+                        
+                        while (!found) {
+                            const w_max = containerWidth - width;
+                            const h_max = height_limit - height;
+                            
+                            for (let attempt = 0; attempt < 50; attempt++) {
+                                let left;
+                                
+                                if (config.isMobile) {
+                                    // Column-based positioning for mobile
+                                    const column = Math.floor(Math.random() * 3);
+                                    const columnWidth = containerWidth / 3;
+                                    const padding = Math.floor(columnWidth * 0.1);
+                                    left = (column * columnWidth) + padding;
+                                } else {
+                                    // Random positioning for desktop
+                                    left = Math.random() * w_max;
+                                }
+                                
+                                const top = Math.random() * h_max;
+                                const right = left + width;
+                                const bottom = top + height;
+                                
+                                // Check for intersections
+                                let intersects = false;
+                                for (const pos of positions) {
+                                    const [b_left, b_top, b_width, b_height] = pos;
+                                    const b_right = b_left + b_width;
+                                    const b_bottom = b_top + b_height;
+                                    
+                                    if (left < b_right && right > b_left && bottom > b_top && top < b_bottom) {
+                                        intersects = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!intersects) {
+                                    found = true;
+                                    left = Math.min(left, containerWidth - width - 10);
+                                    position = [parseInt(left), parseInt(top), width, height];
+                                    break;
+                                }
+                            }
+                            
+                            if (!found) {
+                                height_limit += 30;
+                            }
+                        }
+                        
+                        positions.push(position);
+                        
+                        // Create and position image
+                        const img = document.createElement("img");
+                        img.src = `/images/${filename}`;
+                        img.width = position[2];
+                        img.height = position[3];
+                        img.style.width = `${position[2]}px`;
+                        img.style.height = `${position[3]}px`;
+                        img.style.position = "absolute";
+                        img.style.top = `${position[1]}px`;
+                        img.style.left = `${position[0]}px`;
+                        img.loading = "lazy";
+                        
+                        // Store original position
+                        originalPositions.push({
+                            id: i,
+                            left: position[0],
+                            top: position[1],
+                            width: position[2],
+                            height: position[3]
+                        });
+                        
+                        // Update container height if needed
+                        const currentBottom = position[1] + position[3];
+                        const currentHeight = parseInt(config.containerEl.style.height) || config.containerEl.offsetHeight;
+                        if (currentBottom + 50 > currentHeight) {
+                            config.containerEl.style.height = `${currentBottom + 50}px`;
+                            config.containerEl.style.minHeight = `${currentBottom + 50}px`;
+                        }
+                        
+                        config.containerEl.appendChild(img);
+                        i++;
+                    }, config.imageLoadDelay);
+                })
+                .catch(error => {
+                    console.error('Error loading images:', error);
+                });
         });
     </script>
 </body>
