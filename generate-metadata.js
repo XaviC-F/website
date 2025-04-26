@@ -3,7 +3,7 @@ const path = require('path');
 const sharp = require('sharp');
 
 // Define the directory containing your images
-const imageDirectory = './public/vibe-images';
+const imageDirectory = './public/images';
 const outputPath = './public/image-metadata.json';
 
 async function generateMetadata() {
