@@ -146,8 +146,8 @@ a:hover {
 
 @media screen and (max-width: 767px) {
     .theme-toggle {
-        top: 15px;
-        right: 12px;
+        top: 12px;
+        right: 10px;
     }
     
     .toggle-track {
