@@ -75,35 +75,6 @@ a:hover {
     z-index: 1000;
 }
 
-@media screen and (max-width: 767px) {
-    .theme-toggle {
-        top: 10px;
-        right: 10px;
-    }
-    
-    .toggle-track {
-        width: 40px;
-        height: 20px;
-    }
-    
-    .toggle-thumb {
-        width: 15px;
-        height: 15px;
-    }
-    
-    [data-theme="dark"] .toggle-thumb {
-        left: 20px;
-    }
-    
-    .sun-icon, .moon-icon {
-        width: 12px;
-        height: 12px;
-    }
-    
-    h1 {
-        margin-top: 50px;
-    }
-}
 
 .toggle-track {
     width: 60px;
@@ -170,5 +141,35 @@ a:hover {
     html, body {
         width: 70%;
         text-align: left;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+    }
+    
+    .toggle-track {
+        width: 40px;
+        height: 20px;
+    }
+    
+    .toggle-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    
+    [data-theme="dark"] .toggle-thumb {
+        left: 22px;
+    }
+    
+    .sun-icon, .moon-icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    h1 {
+        margin-top: 40px;
     }
 }
