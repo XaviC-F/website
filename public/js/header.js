@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
         <h1>${pageName}</h1>
-        <p align="center">
+        <h4 align="center">
             <a href="/">Home</a> |
             <a href="/work">Work</a> |
             <a href="/now">Now</a> |
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="https://xavicf.substack.com/">Writing</a> |
             <a href="https://garden.xavicf.com/">Garden</a> |
             <a href="https://x.com/xavicfu">Twitter</a>
-        </p>
+        </h4>
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
