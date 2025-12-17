@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="https://garden.xavicf.com/">Garden</a> |
             <a href="https://x.com/xavicfu">Twitter</a>
         </h4>
+
+        <br>
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
