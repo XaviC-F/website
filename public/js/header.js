@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <p align="center">
             <a href="/">Home</a> |
             <a href="/work">Work</a> |
+            <a href="/now">Now</a> |
             <a href="/vibes">Vibes</a> |
             <a href="https://xavicf.substack.com/">Writing</a> |
             <a href="https://garden.xavicf.com/">Garden</a> |
-            <a href="https://garden.xavicf.com/now">Now</a> |
             <a href="https://x.com/xavicfu">Twitter</a>
         </p>
     `;
