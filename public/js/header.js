@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="/work">Work</a> |
             <a href="/vibes">Vibes</a> |
             <a href="https://xavicf.substack.com/">Writing</a> |
-            <a href="https://xavicf.com/files/Xavi_Costafreda-Fu_CV.pdf">CV</a> |
             <a href="https://garden.xavicf.com/">Garden</a> |
             <a href="https://garden.xavicf.com/now">Now</a> |
             <a href="https://x.com/xavicfu">Twitter</a>
