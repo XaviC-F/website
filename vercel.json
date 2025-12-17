@@ -2,6 +2,7 @@
     "version": 2,
     "buildCommand": "node generate-metadata.js",
     "outputDirectory": "public",
+    "cleanUrls": true,
     "routes": [
       { "handle": "filesystem" },
       { "src": "/(.*)", "dest": "/index.html" }
