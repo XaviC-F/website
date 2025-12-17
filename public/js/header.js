@@ -1,5 +1,22 @@
 // Shared header component
 document.addEventListener('DOMContentLoaded', () => {
+    // Get page name from URL path
+    let path = window.location.pathname;
+
+    // Remove leading slash and .html extension
+    let pageName = path.replace(/^\//, '').replace(/\.html$/, '');
+
+    // Convert to title case: replace hyphens/underscores with spaces and capitalize
+    if (pageName === '') {
+        pageName = 'Xavi Costafreda-Fu';
+    } else {
+        pageName = pageName
+            .replace(/[-_]/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
     const headerHTML = `
         <div class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
             <div class="toggle-track">
@@ -14,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         </div>
-        <h1>Xavi Costafreda-Fu</h1>
+        <h1>${pageName}</h1>
         <p align="center">
             <a href="/">Home</a> |
             <a href="/work">Work</a> |
