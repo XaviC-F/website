@@ -1,5 +1,7 @@
 // Shared header component
-document.addEventListener('DOMContentLoaded', () => {
+// Execute immediately - no need to wait for DOMContentLoaded since this script
+// is placed at the start of <body>, so document.body already exists
+(function() {
     // Get page name from URL path
     let path = window.location.pathname;
 
@@ -46,4 +48,4 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
-});
+})();
